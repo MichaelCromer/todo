@@ -56,14 +56,14 @@ void print_all(char *fpath, int max_lines)
     print_done(fpath, max_lines);
 }
 
-void print_todo(char *fpath, int max_lines) 
+void print_todo(char *fpath, int max_lines)
 {
     // TODO implement
     printf("\n");
     printf("Printing %d todos from %s\n", max_lines, fpath);
 }
 
-void print_done(char *fpath, int max_lines) 
+void print_done(char *fpath, int max_lines)
 {
     // TODO implement
     printf("\n");
@@ -88,7 +88,7 @@ int atoi_pedantic(char *str)
 {
     int result = 0;
     for (int i=0; str[i] != '\0'; i++) {
-        if (!isdigit((unsigned char) str[i])) { 
+        if (!isdigit((unsigned char) str[i])) {
             return 0;
         }
         result = 10*result + (str[i] - '0');
