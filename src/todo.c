@@ -5,8 +5,9 @@
 #include <limits.h>
 
 void print_all(char *fpath, int max_lines);
-void print_done(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
+void print_done(char *fpath, int max_lines);
+void edit_todo_file(char *fpath);
 char *todo_path();
 int atoi_pedantic(char *str);
 
@@ -20,7 +21,9 @@ int main(int argc, char *argv[])
 
     if (argc == 2) {
         // help flag
-        // edit flag
+        if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
+            edit_todo_file(todofile);
+        }
     }
 
     if (argc == 3) {
@@ -105,6 +108,17 @@ void print_done(char *fpath, int max_lines)
         }
     }
     fclose(fptr);
+}
+
+void edit_todo_file(char *fpath)
+{
+    char *editor = getenv("EDITOR");
+    if (editor == NULL) {
+        editor = "vi";
+    }
+    char command[PATH_MAX + 64];
+    snprintf(command, sizeof(command), "%s %s", editor, fpath);
+    system(command);
 }
 
 char *todo_path()
