@@ -61,14 +61,14 @@ void print_todo(char *fpath, int max_lines)
     FILE *fptr;
     char line[LINE_MAX];
     size_t len;
-    int i = 0;
+    int i = 1;
 
-    if ( (fptr = fopen(fpath, "r")) == NULL) {
+    if ((fptr = fopen(fpath, "r")) == NULL) {
         printf("Error finding todo file\n");
         return;
     }
 
-    while ((i < max_lines) && (fgets(line, LINE_MAX, fptr))) {
+    while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
         len = strlen(line);
         if (len < 3) {
             continue;
