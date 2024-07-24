@@ -2,18 +2,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 void print_all(char *fpath, int max_lines);
 void print_done(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
-
+char *todo_path();
 int atoi_pedantic(char *str);
-
-char *TODO_PATH = "~/.todo";
 
 int main(int argc, char *argv[])
 {
+
     if (argc < 2) {
+        // TODO default print behaviour
         return EXIT_SUCCESS;
     }
 
@@ -26,19 +27,20 @@ int main(int argc, char *argv[])
         int arg = atoi_pedantic(argv[2]);
         printf("Flag was %s and arg was %d\n", argv[1], arg);
         if (arg == 0) {
-            // TODO error msg
+            // TODO error handling
+            printf("Error: argument must be a positive integer\n");
             return EXIT_FAILURE;
         }
 
         if ((strcmp(argv[1], "-a") == 0) || (strcmp(argv[1], "--all") == 0)) {
-            print_all(TODO_PATH, arg);
-        } 
+            print_all(todo_path(), arg);
+        }
         else if ((strcmp(argv[1], "-d") == 0) || (strcmp(argv[1], "--done") == 0)) {
-            print_done(TODO_PATH, arg);
-        } 
+            print_done(todo_path(), arg);
+        }
         else if ((strcmp(argv[1], "-t") == 0) || (strcmp(argv[1], "--todo") == 0)) {
-            print_todo(TODO_PATH, arg);
-        } 
+            print_todo(todo_path(), arg);
+        }
         else {
             return EXIT_SUCCESS;
         }
@@ -66,6 +68,20 @@ void print_done(char *fpath, int max_lines)
     // TODO implement
     printf("\n");
     printf("Printing %d dones from %s\n", max_lines, fpath);
+}
+
+char *todo_path()
+{
+    char *pathbuf = malloc(PATH_MAX * sizeof(*pathbuf));
+    char *homedir = getenv("HOME");
+    if (homedir == NULL) {
+        // TODO error handling
+        printf("HOME environment variable not set\n");
+        return NULL;
+    }
+    int chars_written = snprintf(pathbuf, PATH_MAX, "%s/.todo", homedir);
+    pathbuf = realloc(pathbuf, (chars_written + 1)*sizeof(*pathbuf));
+    return pathbuf;
 }
 
 int atoi_pedantic(char *str)
