@@ -9,6 +9,7 @@ void print_all(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
 void print_done(char *fpath, int max_lines);
 void edit_todo_file(char *fpath);
+void mark_done(char *fpath, int item_num);
 bool line_is_todo(char *line);
 bool line_is_done(char *line);
 char *todo_path();
@@ -46,6 +47,9 @@ int main(int argc, char *argv[])
         }
         else if ((strcmp(flag, "-T") == 0) || (strcmp(flag, "--print-todo") == 0)) {
             print_todo(todofile, num_arg);
+        }
+        else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
+            mark_done(todofile, num_arg);
         }
         else {
             return EXIT_SUCCESS;
@@ -112,6 +116,32 @@ void edit_todo_file(char *fpath)
     char command[PATH_MAX + 64];
     snprintf(command, sizeof(command), "%s %s", editor, fpath);
     system(command);
+}
+
+void mark_done(char *fpath, int item_num)
+{
+    FILE *fptr = fopen(fpath, "r+");
+    char line[LINE_MAX];
+    int marker=0;
+
+    if (fptr == NULL) {
+        // TODO error handling
+        printf("HOME environment variable not set\n");
+        return;
+    }
+
+    while (fgets(line, LINE_MAX, fptr)) {
+        if (line_is_todo(line)) {
+            marker++;
+            if (marker == item_num) {
+                fseek(fptr, -strlen(line), SEEK_CUR);
+                line[1] = 'X';
+                fputs(line, fptr);
+            }
+        }
+
+    }
+    fclose(fptr);
 }
 
 char *todo_path()
