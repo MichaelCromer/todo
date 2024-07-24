@@ -18,6 +18,7 @@ void mark_todo(char *fpath, int item_num);
 void add_item(char *fpath, char *item);
 bool line_is_todo(char *line);
 bool line_is_done(char *line);
+FILE *todo_file(char *mode);
 char *todo_path();
 char *concat_args(int argc, char *argv[]);
 int atoi_pedantic(char *str);
@@ -242,6 +243,19 @@ void add_item(char *fpath, char *item)
     fputs(item, fptr);
     fputs("\n", fptr);
     fclose(fptr);
+}
+
+// open the found todo file in the given mode
+FILE *todo_file(char *mode)
+{
+    char *path = todo_path();
+    FILE *fptr = fopen(path, mode);
+    if (fptr == NULL) {
+        // TODO error handling
+        printf("Error: cannot open %s\n", path);
+        exit(EXIT_FAILURE);
+    }
+    return fptr;
 }
 
 // return the path of the .todo file
