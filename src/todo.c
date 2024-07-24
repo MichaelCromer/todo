@@ -5,7 +5,10 @@
 #include <limits.h>
 #include <stdbool.h>
 
+#define TODO_VERSION "1.0"
+
 void print_help();
+void print_version();
 void print_all(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
 void print_done(char *fpath, int max_lines);
@@ -40,6 +43,11 @@ int main(int argc, char *argv[])
     if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
         edit_todo_file(todofile);
         return EXIT_SUCCESS; 
+    }
+
+    if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0)) {
+        print_version();
+        return EXIT_SUCCESS;
     }
 
     if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
@@ -81,6 +89,7 @@ void print_help()
     printf("  Option:\n");
     printf("\t-h --help\tDisplay this message and exit\n");
     printf("\t-e --edit\tOpen the todo file in $EDITOR\n");
+    printf("\t-v --version\tPrint the current version\n");
     printf("\n");
 
     printf("  Option N:\n");
@@ -94,6 +103,11 @@ void print_help()
     printf("Any arguments not matching OPTION [N] create a new todo item\n");
     printf("If no arguments are supplied, defaults to \"todo -t 10\"\n");
     printf("\n");
+}
+
+void print_version()
+{
+    printf("todo version %s\n", TODO_VERSION);
 }
 
 void print_all(char *fpath, int max_lines)
