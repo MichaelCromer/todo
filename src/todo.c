@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdbool.h>
 
+void print_help();
 void print_all(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
 void print_done(char *fpath, int max_lines);
@@ -25,8 +26,10 @@ int main(int argc, char *argv[])
     }
 
     if (argc == 2) {
-        // help flag
-        if ((strcmp(argv[1], "-E") == 0) || (strcmp(argv[1], "--edit") == 0)) {
+        if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
+            print_help();
+        }
+        if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
             edit_todo_file(todofile);
         }
     }
@@ -40,13 +43,13 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
 
-        if ((strcmp(flag, "-A") == 0) || (strcmp(flag, "--print-all") == 0)) {
+        if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
             print_all(todofile, num_arg);
         }
-        else if ((strcmp(flag, "-D") == 0) || (strcmp(flag, "--print-done") == 0)) {
+        else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
             print_done(todofile, num_arg);
         }
-        else if ((strcmp(flag, "-T") == 0) || (strcmp(flag, "--print-todo") == 0)) {
+        else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
             print_todo(todofile, num_arg);
         }
         else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
@@ -60,6 +63,29 @@ int main(int argc, char *argv[])
 
     free(todofile);
     return EXIT_SUCCESS;
+}
+
+void print_help()
+{
+    printf("Usage: todo [OPTION|OPTION N] [MESSAGE]\n");
+    printf("A command line tool to manage todo items\n");
+    printf("\n");
+
+    printf("  Option:\n");
+    printf("\t-h --help\tDisplay this message and exit\n");
+    printf("\t-e --edit\tOpen the todo file in $EDITOR\n");
+    printf("\n");
+
+    printf("  Option N:\n");
+    printf("\t-x --done\tMark the Nth todo item as done\n");
+    printf("\t-o --todo\tMark the Nth done item as todo\n");
+    printf("\t-t --print-todo\tDisplay the first N todo items\n");
+    printf("\t-d --print-done\tDisplay the first N done items\n");
+    printf("\t-a --print-all\tDisplay the first N of all items\n");
+    printf("\n");
+
+    printf("Any arguments not matching OPTION [N] create a new todo item\n");
+    printf("\n");
 }
 
 void print_all(char *fpath, int max_lines)
