@@ -3,11 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdbool.h>
 
 void print_all(char *fpath, int max_lines);
 void print_todo(char *fpath, int max_lines);
 void print_done(char *fpath, int max_lines);
 void edit_todo_file(char *fpath);
+bool line_is_todo(char *line);
+bool line_is_done(char *line);
 char *todo_path();
 int atoi_pedantic(char *str);
 
@@ -64,7 +67,6 @@ void print_todo(char *fpath, int max_lines)
 {
     FILE *fptr;
     char line[LINE_MAX];
-    size_t len;
     int i = 1;
 
     if ((fptr = fopen(fpath, "r")) == NULL) {
@@ -73,11 +75,7 @@ void print_todo(char *fpath, int max_lines)
     }
 
     while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
-        len = strlen(line);
-        if (len < 3) {
-            continue;
-        }
-        if (line[0] == '[' && line[1] == ' ' && line[2] == ']') {
+        if (line_is_todo(line)) {
             printf("\t%d\t%s", i, line);
             i++;
         }
@@ -89,7 +87,6 @@ void print_done(char *fpath, int max_lines)
 {
     FILE *fptr;
     char line[LINE_MAX];
-    size_t len;
     int i = 1;
 
     if ((fptr = fopen(fpath, "r")) == NULL) {
@@ -98,11 +95,7 @@ void print_done(char *fpath, int max_lines)
     }
 
     while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
-        len = strlen(line);
-        if (len < 3) {
-            continue;
-        }
-        if (line[0] == '[' && line[1] == 'X' && line[2] == ']') {
+        if (line_is_done(line)) {
             printf("\t%d\t%s", i, line);
             i++;
         }
@@ -134,6 +127,17 @@ char *todo_path()
     pathbuf = realloc(pathbuf, (chars_written + 1)*sizeof(*pathbuf));
     return pathbuf;
 }
+
+bool line_is_todo(char *line)
+{
+    return (strncmp(line, "[ ]", 3) == 0);
+}
+
+bool line_is_done(char *line)
+{
+    return (strncmp(line, "[X]", 3) == 0);
+}
+
 
 int atoi_pedantic(char *str)
 {
