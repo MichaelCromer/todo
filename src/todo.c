@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+// send help string to stdout
 void print_help()
 {
     printf("Usage: todo [OPTION|OPTION N|MESSAGE]\n");
@@ -105,17 +106,20 @@ void print_help()
     printf("\n");
 }
 
+// send version string to stdout
 void print_version()
 {
     printf("todo version %s\n", TODO_VERSION);
 }
 
+// list 1) todo items and 2) done items up to N items each
 void print_all(char *fpath, int max_lines)
 {
     print_todo(fpath, max_lines);
     print_done(fpath, max_lines);
 }
 
+// list N todo items
 void print_todo(char *fpath, int max_lines)
 {
     FILE *fptr;
@@ -136,6 +140,7 @@ void print_todo(char *fpath, int max_lines)
     fclose(fptr);
 }
 
+// list N done items
 void print_done(char *fpath, int max_lines)
 {
     FILE *fptr;
@@ -156,6 +161,7 @@ void print_done(char *fpath, int max_lines)
     fclose(fptr);
 }
 
+// open todo_file in $EDITOR:-vi
 void edit_todo_file(char *fpath)
 {
     char *editor = getenv("EDITOR");
@@ -167,6 +173,7 @@ void edit_todo_file(char *fpath)
     system(command);
 }
 
+// set the Nth todo item as done
 void mark_done(char *fpath, int item_num)
 {
     FILE *fptr = fopen(fpath, "r+");
@@ -193,6 +200,7 @@ void mark_done(char *fpath, int item_num)
     fclose(fptr);
 }
 
+// set the Nth done item as todo
 void mark_todo(char *fpath, int item_num)
 {
     FILE *fptr = fopen(fpath, "r+");
@@ -219,6 +227,7 @@ void mark_todo(char *fpath, int item_num)
     fclose(fptr);
 }
 
+// append an appropriately formatted todo item
 void add_item(char *fpath, char *item)
 {
     FILE *fptr = fopen(fpath, "a");
@@ -235,6 +244,7 @@ void add_item(char *fpath, char *item)
     fclose(fptr);
 }
 
+// return the path of the .todo file
 char *todo_path()
 {
     char *pathbuf = malloc(PATH_MAX * sizeof(*pathbuf));
@@ -249,16 +259,19 @@ char *todo_path()
     return pathbuf;
 }
 
+// todo line should match an empty check box '[ ]' at pos 0,1,2
 bool line_is_todo(char *line)
 {
     return (strncmp(line, "[ ]", 3) == 0);
 }
 
+// done line should match a filled check box '[X]' at pos 0,1,2
 bool line_is_done(char *line)
 {
     return (strncmp(line, "[X]", 3) == 0);
 }
 
+// squash a list of strings (e.g., make args to todo into a new todo entry)
 char *concat_args(int argc, char *argv[])
 {
     int total_arglen = argc-1;
@@ -274,6 +287,7 @@ char *concat_args(int argc, char *argv[])
     return argbuf;
 }
 
+// don't want e.g., '123abc' to return 123
 int atoi_pedantic(char *str)
 {
     int result = 0;
