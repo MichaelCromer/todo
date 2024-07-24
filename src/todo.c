@@ -78,13 +78,32 @@ void print_todo(char *fpath, int max_lines)
             i++;
         }
     }
+    fclose(fptr);
 }
 
 void print_done(char *fpath, int max_lines)
 {
-    // TODO implement
-    printf("\n");
-    printf("Printing %d dones from %s\n", max_lines, fpath);
+    FILE *fptr;
+    char line[LINE_MAX];
+    size_t len;
+    int i = 1;
+
+    if ((fptr = fopen(fpath, "r")) == NULL) {
+        printf("Error finding todo file\n");
+        return;
+    }
+
+    while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
+        len = strlen(line);
+        if (len < 3) {
+            continue;
+        }
+        if (line[0] == '[' && line[1] == 'X' && line[2] == ']') {
+            printf("\t%d\t%s", i, line);
+            i++;
+        }
+    }
+    fclose(fptr);
 }
 
 char *todo_path()
