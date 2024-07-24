@@ -21,28 +21,28 @@ int main(int argc, char *argv[])
 
     if (argc == 2) {
         // help flag
-        if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
+        if ((strcmp(argv[1], "-E") == 0) || (strcmp(argv[1], "--edit") == 0)) {
             edit_todo_file(todofile);
         }
     }
 
     if (argc == 3) {
-        int arg = atoi_pedantic(argv[2]);
-        printf("Flag was %s and arg was %d\n", argv[1], arg);
-        if (arg == 0) {
+        char *flag = argv[1];
+        int num_arg = atoi_pedantic(argv[2]);
+        if (num_arg == 0) {
             // TODO error handling
             printf("Error: argument must be a positive integer\n");
             return EXIT_FAILURE;
         }
 
-        if ((strcmp(argv[1], "-a") == 0) || (strcmp(argv[1], "--all") == 0)) {
-            print_all(todofile, arg);
+        if ((strcmp(flag, "-A") == 0) || (strcmp(flag, "--print-all") == 0)) {
+            print_all(todofile, num_arg);
         }
-        else if ((strcmp(argv[1], "-d") == 0) || (strcmp(argv[1], "--done") == 0)) {
-            print_done(todofile, arg);
+        else if ((strcmp(flag, "-D") == 0) || (strcmp(flag, "--print-done") == 0)) {
+            print_done(todofile, num_arg);
         }
-        else if ((strcmp(argv[1], "-t") == 0) || (strcmp(argv[1], "--todo") == 0)) {
-            print_todo(todofile, arg);
+        else if ((strcmp(flag, "-T") == 0) || (strcmp(flag, "--print-todo") == 0)) {
+            print_todo(todofile, num_arg);
         }
         else {
             return EXIT_SUCCESS;
