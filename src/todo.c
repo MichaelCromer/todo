@@ -12,6 +12,7 @@ void print_done(char *fpath, int max_lines);
 void edit_todo_file(char *fpath);
 void mark_done(char *fpath, int item_num);
 void mark_todo(char *fpath, int item_num);
+void add_item(char *fpath, char *item);
 bool line_is_todo(char *line);
 bool line_is_done(char *line);
 char *todo_path();
@@ -194,6 +195,22 @@ void mark_todo(char *fpath, int item_num)
         }
 
     }
+    fclose(fptr);
+}
+
+void add_item(char *fpath, char *item)
+{
+    FILE *fptr = fopen(fpath, "a");
+
+    if (fptr == NULL) {
+        // TODO error handling
+        printf("HOME environment variable not set\n");
+        return;
+    }
+
+    fputs("[ ]", fptr);
+    fputs(item, fptr);
+    fputs("\n", fptr);
     fclose(fptr);
 }
 
