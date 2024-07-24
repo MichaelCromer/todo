@@ -12,9 +12,9 @@ int atoi_pedantic(char *str);
 
 int main(int argc, char *argv[])
 {
-
+    char *todofile = todo_path();
     if (argc < 2) {
-        // TODO default print behaviour
+        print_todo(todofile, 10);
         return EXIT_SUCCESS;
     }
 
@@ -33,13 +33,13 @@ int main(int argc, char *argv[])
         }
 
         if ((strcmp(argv[1], "-a") == 0) || (strcmp(argv[1], "--all") == 0)) {
-            print_all(todo_path(), arg);
+            print_all(todofile, arg);
         }
         else if ((strcmp(argv[1], "-d") == 0) || (strcmp(argv[1], "--done") == 0)) {
-            print_done(todo_path(), arg);
+            print_done(todofile, arg);
         }
         else if ((strcmp(argv[1], "-t") == 0) || (strcmp(argv[1], "--todo") == 0)) {
-            print_todo(todo_path(), arg);
+            print_todo(todofile, arg);
         }
         else {
             return EXIT_SUCCESS;
@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
+    free(todofile);
     return EXIT_SUCCESS;
 }
 
