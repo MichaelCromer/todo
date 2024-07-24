@@ -22,45 +22,50 @@ int atoi_pedantic(char *str);
 int main(int argc, char *argv[])
 {
     char *todofile = todo_path();
+    char *flag;
+    int num_arg;
+
     if (argc < 2) {
         print_todo(todofile, 10);
         return EXIT_SUCCESS;
     }
 
-    if (argc == 2) {
-        if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
-            print_help();
-        }
-        if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
-            edit_todo_file(todofile);
-        }
+    flag = argv[1];
+
+    if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
+        print_help();
+        return EXIT_SUCCESS;
     }
 
-    if (argc == 3) {
-        char *flag = argv[1];
-        int num_arg = atoi_pedantic(argv[2]);
-        if (num_arg == 0) {
-            // TODO error handling
-            printf("Error: argument must be a positive integer\n");
-            return EXIT_FAILURE;
-        }
+    if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
+        edit_todo_file(todofile);
+        return EXIT_SUCCESS; 
+    }
 
-        if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
-            print_all(todofile, num_arg);
-        }
-        else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
-            print_done(todofile, num_arg);
-        }
-        else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
-            print_todo(todofile, num_arg);
-        }
-        else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
-            mark_done(todofile, num_arg);
-        }
-        else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
-            mark_todo(todofile, num_arg);
-        }
-        return EXIT_SUCCESS;
+    if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
+        num_arg = atoi_pedantic(argv[2]);
+        print_all(todofile, num_arg);
+    }
+    else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
+        num_arg = atoi_pedantic(argv[2]);
+        print_done(todofile, num_arg);
+    }
+    else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
+        num_arg = atoi_pedantic(argv[2]);
+        print_todo(todofile, num_arg);
+    }
+    else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
+        num_arg = atoi_pedantic(argv[2]);
+        mark_done(todofile, num_arg);
+    }
+    else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
+        num_arg = atoi_pedantic(argv[2]);
+        mark_todo(todofile, num_arg);
+    }
+    else {
+        char *message = concat_args(argc, argv);
+        add_item(todofile, message);
+        free(message);
     }
 
     free(todofile);
