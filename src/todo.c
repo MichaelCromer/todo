@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
 void print_help()
 {
-    printf("Usage: todo [OPTION|OPTION N] [MESSAGE]\n");
+    printf("Usage: todo [OPTION|OPTION N|MESSAGE]\n");
     printf("A command line tool to manage todo items\n");
     printf("\n");
 
@@ -87,6 +87,7 @@ void print_help()
     printf("\n");
 
     printf("Any arguments not matching OPTION [N] create a new todo item\n");
+    printf("If no arguments are supplied, defaults to \"todo -t 10\"\n");
     printf("\n");
 }
 
