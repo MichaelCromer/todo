@@ -16,6 +16,7 @@ void add_item(char *fpath, char *item);
 bool line_is_todo(char *line);
 bool line_is_done(char *line);
 char *todo_path();
+char *concat_args(int argc, char *argv[]);
 int atoi_pedantic(char *str);
 
 int main(int argc, char *argv[])
@@ -238,6 +239,20 @@ bool line_is_done(char *line)
     return (strncmp(line, "[X]", 3) == 0);
 }
 
+char *concat_args(int argc, char *argv[])
+{
+    int total_arglen = argc-1;
+    for (int i=1; i < argc; i++) {
+        total_arglen += strlen(argv[i]);
+    }
+    char *argbuf = malloc((total_arglen + 1) * sizeof(*argbuf));
+    for (int i=1; i < argc; i++) {
+        argbuf = strcat(argbuf, " ");
+        argbuf = strcat(argbuf, argv[i]);
+    }
+
+    return argbuf;
+}
 
 int atoi_pedantic(char *str)
 {
