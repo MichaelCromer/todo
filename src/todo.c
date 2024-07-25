@@ -90,7 +90,7 @@ void print_help()
     printf("  Option:\n");
     printf("\t-h --help\tDisplay this message and exit\n");
     printf("\t-e --edit\tOpen the todo file in $EDITOR\n");
-    printf("\t-v --version\tPrint the current version\n");
+    printf("\t-v --version\tDisplay the current version #\n");
     printf("\n");
 
     printf("  Option N:\n");
@@ -98,12 +98,11 @@ void print_help()
     printf("\t-o --todo\tMark the Nth done item as todo\n");
     printf("\t-t --print-todo\tDisplay the first N todo items\n");
     printf("\t-d --print-done\tDisplay the first N done items\n");
-    printf("\t-a --print-all\tDisplay the first N of all items\n");
+    printf("\t-a --print-all\tDisplay -t N, -d N in sequence\n");
     printf("\n");
 
-    printf("Any arguments not matching OPTION [N] create a new todo item\n");
-    printf("If no arguments are supplied, defaults to \"todo -t 10\"\n");
-    printf("\n");
+    printf("Arguments not matching [OPT|OPT N] create a new item\n");
+    printf("If no arguments are supplied, default is todo -t 10\n");
 }
 
 // send version string to stdout
