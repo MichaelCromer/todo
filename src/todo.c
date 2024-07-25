@@ -9,28 +9,28 @@
 
 void print_help();
 void print_version();
-void print_all(char *fpath, int max_lines);
-void print_todo(char *fpath, int max_lines);
-void print_done(char *fpath, int max_lines);
-void edit_todo_file(char *fpath);
-void mark_done(char *fpath, int item_num);
-void mark_todo(char *fpath, int item_num);
-void add_item(char *fpath, char *item);
+void print_all(int max_lines);
+void print_todo(int max_lines);
+void print_done(int max_lines);
+void edit_todo_file();
+void mark_done(int item_num);
+void mark_todo(int item_num);
+void add_item(char *item);
 bool line_is_todo(char *line);
 bool line_is_done(char *line);
 FILE *todo_file(char *mode);
 char *todo_path();
 char *concat_args(int argc, char *argv[]);
+int get_numeric_arg(int argc, char *argv[]);
 int atoi_pedantic(char *str);
 
 int main(int argc, char *argv[])
 {
-    char *todofile = todo_path();
     char *flag;
     int num_arg;
 
     if (argc < 2) {
-        print_todo(todofile, 10);
+        print_todo(10);
         return EXIT_SUCCESS;
     }
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     }
 
     if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
-        edit_todo_file(todofile);
+        edit_todo_file();
         return EXIT_SUCCESS; 
     }
 
@@ -53,31 +53,30 @@ int main(int argc, char *argv[])
 
     if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
         num_arg = atoi_pedantic(argv[2]);
-        print_all(todofile, num_arg);
+        print_all(num_arg);
     }
     else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
         num_arg = atoi_pedantic(argv[2]);
-        print_done(todofile, num_arg);
+        print_done(num_arg);
     }
     else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
         num_arg = atoi_pedantic(argv[2]);
-        print_todo(todofile, num_arg);
+        print_todo(num_arg);
     }
     else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
         num_arg = atoi_pedantic(argv[2]);
-        mark_done(todofile, num_arg);
+        mark_done(num_arg);
     }
     else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
         num_arg = atoi_pedantic(argv[2]);
-        mark_todo(todofile, num_arg);
+        mark_todo(num_arg);
     }
     else {
         char *message = concat_args(argc, argv);
-        add_item(todofile, message);
+        add_item(message);
         free(message);
     }
 
-    free(todofile);
     return EXIT_SUCCESS;
 }
 
@@ -114,23 +113,18 @@ void print_version()
 }
 
 // list 1) todo items and 2) done items up to N items each
-void print_all(char *fpath, int max_lines)
+void print_all(int max_lines)
 {
-    print_todo(fpath, max_lines);
-    print_done(fpath, max_lines);
+    print_todo(max_lines);
+    print_done(max_lines);
 }
 
 // list N todo items
-void print_todo(char *fpath, int max_lines)
+void print_todo(int max_lines)
 {
-    FILE *fptr;
+    FILE *fptr = todo_file("r");
     char line[LINE_MAX];
     int i = 1;
-
-    if ((fptr = fopen(fpath, "r")) == NULL) {
-        printf("Error finding todo file\n");
-        return;
-    }
 
     while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
         if (line_is_todo(line)) {
@@ -142,16 +136,11 @@ void print_todo(char *fpath, int max_lines)
 }
 
 // list N done items
-void print_done(char *fpath, int max_lines)
+void print_done(int max_lines)
 {
-    FILE *fptr;
+    FILE *fptr = todo_file("r");
     char line[LINE_MAX];
     int i = 1;
-
-    if ((fptr = fopen(fpath, "r")) == NULL) {
-        printf("Error finding todo file\n");
-        return;
-    }
 
     while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
         if (line_is_done(line)) {
@@ -163,29 +152,25 @@ void print_done(char *fpath, int max_lines)
 }
 
 // open todo_file in $EDITOR:-vi
-void edit_todo_file(char *fpath)
+void edit_todo_file()
 {
+    char *fpath = todo_path();
     char *editor = getenv("EDITOR");
     if (editor == NULL) {
         editor = "vi";
     }
     char command[PATH_MAX + 64];
     snprintf(command, sizeof(command), "%s %s", editor, fpath);
+    free(fpath);
     system(command);
 }
 
 // set the Nth todo item as done
-void mark_done(char *fpath, int item_num)
+void mark_done(int item_num)
 {
-    FILE *fptr = fopen(fpath, "r+");
+    FILE *fptr = todo_file("r+");
     char line[LINE_MAX];
     int marker=0;
-
-    if (fptr == NULL) {
-        // TODO error handling
-        printf("HOME environment variable not set\n");
-        return;
-    }
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_todo(line)) {
@@ -202,17 +187,11 @@ void mark_done(char *fpath, int item_num)
 }
 
 // set the Nth done item as todo
-void mark_todo(char *fpath, int item_num)
+void mark_todo(int item_num)
 {
-    FILE *fptr = fopen(fpath, "r+");
+    FILE *fptr = todo_file("r+");
     char line[LINE_MAX];
     int marker=0;
-
-    if (fptr == NULL) {
-        // TODO error handling
-        printf("HOME environment variable not set\n");
-        return;
-    }
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_done(line)) {
@@ -229,15 +208,9 @@ void mark_todo(char *fpath, int item_num)
 }
 
 // append an appropriately formatted todo item
-void add_item(char *fpath, char *item)
+void add_item(char *item)
 {
-    FILE *fptr = fopen(fpath, "a");
-
-    if (fptr == NULL) {
-        // TODO error handling
-        printf("HOME environment variable not set\n");
-        return;
-    }
+    FILE *fptr = todo_file("a");
 
     fputs("[ ]", fptr);
     fputs(item, fptr);
@@ -248,13 +221,14 @@ void add_item(char *fpath, char *item)
 // open the found todo file in the given mode
 FILE *todo_file(char *mode)
 {
-    char *path = todo_path();
-    FILE *fptr = fopen(path, mode);
+    char *fpath = todo_path();
+    FILE *fptr = fopen(fpath, mode);
     if (fptr == NULL) {
         // TODO error handling
-        printf("Error: cannot open %s\n", path);
+        printf("Error: cannot open %s\n", fpath);
         exit(EXIT_FAILURE);
     }
+    free(fpath);
     return fptr;
 }
 
