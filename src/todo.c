@@ -52,23 +52,23 @@ int main(int argc, char *argv[])
     }
 
     if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
-        num_arg = atoi_pedantic(argv[2]);
+        num_arg = get_numeric_arg(argc, argv);
         print_all(num_arg);
     }
     else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
-        num_arg = atoi_pedantic(argv[2]);
+        num_arg = get_numeric_arg(argc, argv);
         print_done(num_arg);
     }
     else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
-        num_arg = atoi_pedantic(argv[2]);
+        num_arg = get_numeric_arg(argc, argv);
         print_todo(num_arg);
     }
     else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
-        num_arg = atoi_pedantic(argv[2]);
+        num_arg = get_numeric_arg(argc, argv);
         mark_done(num_arg);
     }
     else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
-        num_arg = atoi_pedantic(argv[2]);
+        num_arg = get_numeric_arg(argc, argv);
         mark_todo(num_arg);
     }
     else {
@@ -273,6 +273,18 @@ char *concat_args(int argc, char *argv[])
     }
 
     return argbuf;
+}
+
+// safely capture a numeric argument from the parameters
+int get_numeric_arg(int argc, char *argv[])
+{
+    if (argc < 3) {
+        // TODO error handilng
+        printf("Flag needs numeric argument\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return atoi_pedantic(argv[2]);
 }
 
 // don't want e.g., '123abc' to return 123
