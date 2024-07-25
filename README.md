@@ -43,8 +43,8 @@ will generally bail out if it can't find it.
 
 All that `todo` cares about is
 
-- lines starting with "[ ]" to represent todo items
-- lines starting with "[X]" to represent done items
+- lines starting with `[ ]` to represent todo items
+- lines starting with `[X]` to represent done items
 
 All other lines in `.todo` are ignored.
 

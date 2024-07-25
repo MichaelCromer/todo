@@ -1,9 +1,9 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define TODO_VERSION "1.0"
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         mark_todo(num_arg);
     }
     else {
-        char *message = concat_args(argc, argv);
+        char *message = concat_args(argc-1, &argv[1]);
         add_item(message);
         free(message);
     }
@@ -259,16 +259,18 @@ bool line_is_done(char *line)
 }
 
 // squash a list of strings (e.g., make args to todo into a new todo entry)
-char *concat_args(int argc, char *argv[])
+char *concat_args(int nstr, char *strs[])
 {
-    int total_arglen = argc-1;
-    for (int i=1; i < argc; i++) {
-        total_arglen += strlen(argv[i]);
+    int total_strlen = nstr; // start with #gaps for spaces
+    for (int i = 0; i < nstr; i++) {
+        total_strlen += strlen(strs[i]);
     }
-    char *argbuf = malloc((total_arglen + 1) * sizeof(*argbuf));
-    for (int i=1; i < argc; i++) {
+
+    char *argbuf = malloc((total_strlen + 1) * sizeof(*argbuf));
+    argbuf[0] = '\0';
+    for (int i=0; i < nstr; i++) {
         argbuf = strcat(argbuf, " ");
-        argbuf = strcat(argbuf, argv[i]);
+        argbuf = strcat(argbuf, strs[i]);
     }
 
     return argbuf;
