@@ -10,10 +10,13 @@ A command line tool for managing todo lists.
 
 Without any arguments, `todo` will default to displaying the top 10 todo items.
 
-Arguments are parsed to match `OPTION`, then `OPTION N`, then `MESSAGE`, in that order.
-In essence, anything that doesn't match an option flag known to `todo` will be recorded
-as a new todo item. In the case of options requiring numeric arguments, an incomplete
-match will result in an error message, and not fall through to the `MESSAGE` case.
+Arguments are parsed to match the `OPTION`, the `OPTION N`, then the `MESSAGE` case, in
+that order. If a match is found, trailing arguments are ignored. In the `OPTION N` case,
+an incomplete match will result in an error, and will not fall through to the `MESSAGE`
+case. 
+
+In essence, any input that doesn't look like it begins with an option flag known to
+`todo` will be concatenated and recorded as a new todo item. 
 
 ### Options
 
@@ -33,23 +36,24 @@ match will result in an error message, and not fall through to the `MESSAGE` cas
 ## The .todo File
 
 Currently, `todo` is hard-coded to look for `$HOME/.todo`, a plain text file, as the
-source of all todo items. *It is up to you to ensure this file exists*, as `todo` will
-bail out if it can't find it.
+source of all todo items. **It is up to you to ensure this file exists**, and `todo`
+will generally bail out if it can't find it.
 
 ### Syntax
 
 All that `todo` cares about is
-    - lines starting with "[ ]" to represent todo items
-    - lines starting with "[X]" to represent done items
+
+- lines starting with "[ ]" to represent todo items
+- lines starting with "[X]" to represent done items
 
 All other lines in `.todo` are ignored.
 
 ### Maintenance
 
 Updating of line items is done in-place. New todo items are appended to the end of the
-file.  Therefore, the oldest todo items appear at the top of the todo list, and then
-move to the top of the done list when marked off. This may not be desirable but it's how
-it works (for now).
+file.  Therefore, the older a todo item is, the higher up in the todo list it appears.
+Likewise, when marked off, the higher up in the done list it appears.  This may not be
+desirable but it's how it works (for now).
 
 ## Future Goals
 
@@ -58,6 +62,7 @@ it works (for now).
   e.g., todo item management in a git repo or other 'project' directory.
 - vaguely intelligent todo/done item sorting and updating to match the most sensible
   expected use case: todo items listed oldest-youngest (assumption is that older todo
-  items are more urgent), done items are listed youngest-oldest, age of an item being
-  determined from when it was marked completed (assumption is that older done items are
-  more 'stale'/less interesting/less likely to be opened back up again with an -o call).
+  items are more urgent), done items are listed youngest-oldest, counting from when it
+  was marked completed (assumption is that older done items are more 'stale'/less
+  interesting/less likely to be opened back up again with an -o call). Marking a done
+  item as undone should be treated like creating a new todo item with the old text.
