@@ -7,6 +7,8 @@
 
 #define TODO_VERSION "1.0"
 
+#define TODO_MAX_ITEMLINES 64
+
 void print_help();
 void print_version();
 void print_all(int max_lines);
@@ -165,44 +167,94 @@ void edit_todo_file()
 }
 
 // set the Nth todo item as done
+// implementation of "sorting" algorithm
+// newly done items should be moved to the top
 void mark_done(int item_num)
 {
-    FILE *fptr = todo_file("r+");
+    FILE *fptr = todo_file("r");
+
+    int line_num = 0;
+    int count_todo = 0;
+    int capacity = TODO_MAX_ITEMLINES;
+    bool found = false;
     char line[LINE_MAX];
-    int marker=0;
+    char target[LINE_MAX];
+    char **lines = malloc(capacity * sizeof(**lines));
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_todo(line)) {
-            marker++;
-            if (marker == item_num) {
-                fseek(fptr, -strlen(line), SEEK_CUR);
-                line[1] = 'X';
-                fputs(line, fptr);
+            count_todo++;
+            if (count_todo == item_num) {
+                strcpy(target, line);
+                target[1] = 'X';
+                found = true;
+                continue;
             }
         }
-
+        if (line_num > capacity) {
+            capacity *= 2;
+            lines = realloc(lines, capacity * sizeof(**lines));
+        }
+        lines[line_num] = malloc((strlen(line)+1) * sizeof(*line));
+        lines[line_num] = strcpy(lines[line_num], line);
+        line_num++;
     }
+
+    fptr = freopen(NULL, "w", fptr);
+    if (found) {
+        fputs(target, fptr);
+    }
+    for (int i = 0; i < line_num; i++) {
+        fputs(lines[i], fptr);
+        free(lines[i]);
+    }
+    free(lines);
     fclose(fptr);
 }
 
 // set the Nth done item as todo
+// implementation of "sorting" algorithm:
+// newest todo items get put at the end
 void mark_todo(int item_num)
 {
-    FILE *fptr = todo_file("r+");
+    FILE *fptr = todo_file("r");
+
+    int line_num = 0;
+    int count_done = 0;
+    int capacity = TODO_MAX_ITEMLINES;
+    bool found = false;
     char line[LINE_MAX];
-    int marker=0;
+    char target[LINE_MAX];
+    char **lines = malloc(capacity * sizeof(**lines));
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_done(line)) {
-            marker++;
-            if (marker == item_num) {
-                fseek(fptr, -strlen(line), SEEK_CUR);
-                line[1] = ' ';
-                fputs(line, fptr);
+            count_done++;
+            if (count_done == item_num) {
+                strcpy(target, line);
+                target[1] = ' ';
+                found = true;
+                continue;
             }
         }
-
+        if (line_num > capacity) {
+            capacity *= 2;
+            lines = realloc(lines, capacity * sizeof(**lines));
+        }
+        lines[line_num] = malloc((strlen(line)+1) * sizeof(*line));
+        lines[line_num] = strcpy(lines[line_num], line);
+        line_num++;
     }
+
+    fptr = freopen(NULL, "w", fptr);
+    for (int i = 0; i < line_num; i++) {
+        fputs(lines[i], fptr);
+        free(lines[i]);
+    }
+    if (found) {
+        fputs(target, fptr);
+    }
+    free(lines);
     fclose(fptr);
 }
 
