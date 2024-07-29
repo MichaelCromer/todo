@@ -50,19 +50,17 @@ All other lines in `.todo` are ignored.
 
 ### Maintenance
 
-Updating of line items is done in-place. New todo items are appended to the end of the
-file.  Therefore, the older a todo item is, the higher up in the todo list it appears.
-Likewise, when marked off, the higher up in the done list it appears.  This may not be
-desirable but it's how it works (for now).
+Updating of line items occurs in the following way: 
+
+- items marked 'done' are moved to the top of the file; and,
+- items marked 'todo' are moved to the bottom of the file (as if added as a new item).
+
+This behaviour provides a kind of passive "sorting" algorithm, which ensures that newly
+comleted items appear at the top of the done list, and newly reopened items are treated
+with the same priority as newly added ones.
 
 ## Future Goals
 
 - `todo` instead recursively climbs the dirtree from where it is invoked, looking for a
   `.todo` file, falling back to `$HOME/.todo` if nothing is found. This would allow for
   e.g., todo item management in a git repo or other 'project' directory.
-- vaguely intelligent todo/done item sorting and updating to match the most sensible
-  expected use case: todo items listed oldest-youngest (assumption is that older todo
-  items are more urgent), done items are listed youngest-oldest, counting from when it
-  was marked completed (assumption is that older done items are more 'stale'/less
-  interesting/less likely to be opened back up again with an -o call). Marking a done
-  item as undone should be treated like creating a new todo item with the old text.
