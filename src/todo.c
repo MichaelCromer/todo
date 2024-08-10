@@ -4,27 +4,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define TODO_VERSION "1.0"
 
 #define TODO_MAX_ITEMLINES 64
 
-void print_help();
-void print_version();
-void print_all(int max_lines);
-void print_todo(int max_lines);
-void print_done(int max_lines);
+void add_item(char *item);
+int atoi_pedantic(char *str);
+char *concat_args(int argc, char *argv[]);
 void edit_todo_file();
+int get_numeric_arg(int argc, char *argv[]);
+bool line_is_done(char *line);
+bool line_is_todo(char *line);
 void mark_done(int item_num);
 void mark_todo(int item_num);
-void add_item(char *item);
-bool line_is_todo(char *line);
-bool line_is_done(char *line);
+void print_all(int max_lines);
+void print_done(int max_lines);
+void print_help();
+void print_todo(int max_lines);
+void print_version();
 FILE *todo_file(char *mode);
+bool file_exists(char *file_path);
+char *todo_home_path();
 char *todo_path();
-char *concat_args(int argc, char *argv[]);
-int get_numeric_arg(int argc, char *argv[]);
-int atoi_pedantic(char *str);
+char *todo_search_upwards(char *dir_path);
 
 int main(int argc, char *argv[])
 {
@@ -286,15 +291,46 @@ FILE *todo_file(char *mode)
 // return the path of the .todo file
 char *todo_path()
 {
-    char *pathbuf = malloc(PATH_MAX * sizeof(*pathbuf));
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        // TODO error handling
+        printf("Error: cannot open current working directory\n");
+    }
+
+    char *path = malloc(strlen(cwd) + 7);
+    while (1) {
+        sprintf(path, "%s/.todo", cwd);
+        if (file_exists(path)) {
+            return path;
+        }
+
+        char *parent_dir = strrchr(cwd, '/');
+        if (parent_dir == NULL) { break; }
+        *parent_dir = '\0';
+        if (strlen(cwd) == 0) { break; }
+    }
+
+    return todo_home_path();
+}
+
+
+bool file_exists(char *file_path)
+{
+    struct stat s;
+    return (stat(file_path, &s) == 0);
+}
+
+// return the path of the .todo file in the home directory
+char *todo_home_path()
+{
     char *homedir = getenv("HOME");
     if (homedir == NULL) {
         // TODO error handling
         printf("HOME environment variable not set\n");
         return NULL;
     }
-    int chars_written = snprintf(pathbuf, PATH_MAX, "%s/.todo", homedir);
-    pathbuf = realloc(pathbuf, (chars_written + 1)*sizeof(*pathbuf));
+    char *pathbuf = malloc(strlen(homedir) + 7);
+    sprintf(pathbuf, "%s/.todo", homedir);
     return pathbuf;
 }
 
