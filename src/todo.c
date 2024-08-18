@@ -1,3 +1,14 @@
+/*--------------------------------------------------------------------------------------
+    todo - a command line tool to manage todo items
+----------------------------------------------------------------------------------------
+    mcromer, Aug 2024
+========================================================================================
+*/
+
+/*--------------------------------------------------------------------------------------
+    Setup
+*/
+
 #include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -9,6 +20,11 @@
 
 #define TODO_VERSION "1.0"
 #define TODO_MAX_ITEMLINES 64
+
+
+/*--------------------------------------------------------------------------------------
+    -h etc
+*/
 
 // send help string to stdout
 void print_help()
@@ -43,7 +59,12 @@ void print_version()
 }
 
 
-// don't want e.g., '123abc' to return 123
+/*--------------------------------------------------------------------------------------
+    Input
+*/
+
+
+// get numeric input carefully - don't want e.g., '123abc' to return 123
 int atoi_pedantic(char *str)
 {
     int result = 0;
@@ -58,6 +79,7 @@ int atoi_pedantic(char *str)
 
 
 // safely capture a numeric argument from the parameters
+// assumes something like 'todo -x 3'
 int get_numeric_arg(int argc, char *argv[])
 {
     if (argc < 3) {
@@ -70,7 +92,30 @@ int get_numeric_arg(int argc, char *argv[])
 }
 
 
-// return the path of the .todo file
+// squash a list of strings (e.g., make all args into a new todo entry)
+char *concat_args(int nstr, char *strs[])
+{
+    int total_strlen = nstr; // start with #gaps for spaces
+    for (int i = 0; i < nstr; i++) {
+        total_strlen += strlen(strs[i]);
+    }
+
+    char *argbuf = malloc((total_strlen + 1) * sizeof(*argbuf));
+    argbuf[0] = '\0';
+    for (int i=0; i < nstr; i++) {
+        argbuf = strcat(argbuf, " ");
+        argbuf = strcat(argbuf, strs[i]);
+    }
+
+    return argbuf;
+}
+
+
+/*--------------------------------------------------------------------------------------
+    File
+*/
+
+// file existence helper
 bool file_exists(char *file_path)
 {
     struct stat s;
@@ -93,6 +138,7 @@ char *todo_home_path()
 }
 
 
+// dynamically source the right .todo file recursively in tree
 char *todo_path()
 {
     char cwd[PATH_MAX];
@@ -118,7 +164,7 @@ char *todo_path()
 }
 
 
-// open the found todo file in the given mode
+// dynamically open the right .todo file in the given mode
 FILE *todo_file(char *mode)
 {
     char *fpath = todo_path();
@@ -133,6 +179,12 @@ FILE *todo_file(char *mode)
 }
 
 
+/*--------------------------------------------------------------------------------------
+    Reading
+*/
+
+
+// todo line should match an empty check box '[ ]' at pos 0,1,2
 bool line_is_todo(char *line)
 {
     return (strncmp(line, "[ ]", 3) == 0);
@@ -188,6 +240,10 @@ void print_all(int max_lines)
 }
 
 
+/*--------------------------------------------------------------------------------------
+    Writing
+*/
+
 // open todo_file in $EDITOR:-vi
 void edit_todo_file()
 {
@@ -204,8 +260,8 @@ void edit_todo_file()
 
 
 // set the Nth todo item as done
-// implementation of "sorting" algorithm
-// newly done items should be moved to the top
+// implementation of "sorting" algorithm:
+//      newly done items are moved to the top
 void mark_done(int item_num)
 {
     FILE *fptr = todo_file("r");
@@ -252,7 +308,7 @@ void mark_done(int item_num)
 
 // set the Nth done item as todo
 // implementation of "sorting" algorithm:
-// newest todo items get put at the end
+//      newest todo items are put/moved to the bottom
 void mark_todo(int item_num)
 {
     FILE *fptr = todo_file("r");
@@ -306,26 +362,6 @@ void add_item(char *item)
     fputs(item, fptr);
     fputs("\n", fptr);
     fclose(fptr);
-}
-
-
-// todo line should match an empty check box '[ ]' at pos 0,1,2
-// squash a list of strings (e.g., make args to todo into a new todo entry)
-char *concat_args(int nstr, char *strs[])
-{
-    int total_strlen = nstr; // start with #gaps for spaces
-    for (int i = 0; i < nstr; i++) {
-        total_strlen += strlen(strs[i]);
-    }
-
-    char *argbuf = malloc((total_strlen + 1) * sizeof(*argbuf));
-    argbuf[0] = '\0';
-    for (int i=0; i < nstr; i++) {
-        argbuf = strcat(argbuf, " ");
-        argbuf = strcat(argbuf, strs[i]);
-    }
-
-    return argbuf;
 }
 
 
