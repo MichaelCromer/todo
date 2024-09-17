@@ -78,20 +78,6 @@ int atoi_pedantic(char *str)
 }
 
 
-// safely capture a numeric argument from the parameters
-// assumes something like 'todo -x 3'
-int get_numeric_arg(int argc, char *argv[])
-{
-    if (argc < 3) {
-        // TODO error handilng
-        printf("Flag needs numeric argument\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return atoi_pedantic(argv[2]);
-}
-
-
 // squash a list of strings (e.g., make all args into a new todo entry)
 char *concat_args(int nstr, char *strs[])
 {
@@ -407,7 +393,7 @@ int main(int argc, char *argv[])
     /* can handle concatenated short/numeric options, e.g. -x3 == -x 3 */
     if (argc == 2) {
         if (strlen(flag) < 3) {
-            fprintf(stderr, "Error: %s needs a numeric argument.\n", flag);
+            fprintf(stderr, "Error: %s needs additional arguments.\n", flag);
             return EXIT_FAILURE;
         }
         n = atoi_pedantic(flag+2);
@@ -439,31 +425,37 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    /* now check flags with parameters */
-    if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
-        n = get_numeric_arg(argc, argv);
-        print_all(n);
-    }
-    else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
-        n = get_numeric_arg(argc, argv);
-        print_done(n);
-    }
-    else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
-        n = get_numeric_arg(argc, argv);
-        print_todo(n);
-    }
-    else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
-        n = get_numeric_arg(argc, argv);
-        mark_done(n);
-    }
-    else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
-        n = get_numeric_arg(argc, argv);
-        mark_todo(n);
-    }
-    else {
+    if (strcmp(flag, "--") == 0) {
         char *message = concat_args(argc-1, &argv[1]);
         add_item(message);
         free(message);
+        return EXIT_SUCCESS;
+    }
+
+    n = atoi_pedantic(argv[2]);
+    if (n == 0) {
+        fprintf(stderr, "Error: %s needs a numeric argument.\n", flag);
+        return EXIT_FAILURE;
+    }
+
+    /* now check flags with parameters */
+    if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
+        print_all(n);
+    }
+    else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
+        print_done(n);
+    }
+    else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
+        print_todo(n);
+    }
+    else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
+        mark_done(n);
+    }
+    else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
+        mark_todo(n);
+    }
+    else {
+
     }
 
     return EXIT_SUCCESS;
