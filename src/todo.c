@@ -372,8 +372,9 @@ void add_item(char *item)
 int main(int argc, char *argv[])
 {
     char *flag;
-    int num_arg;
+    int n;
 
+    /* no args, default : display some todo items */
     if (argc < 2) {
         print_todo(10);
         return EXIT_SUCCESS;
@@ -381,40 +382,83 @@ int main(int argc, char *argv[])
 
     flag = argv[1];
 
-    if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
+    /* exact match on particular flags */
+    if ((strcmp(flag, "-h") == 0) || (strcmp(flag, "--help") == 0)) {
         print_help();
         return EXIT_SUCCESS;
     }
 
-    if ((strcmp(argv[1], "-e") == 0) || (strcmp(argv[1], "--edit") == 0)) {
+    if ((strcmp(flag, "-e") == 0) || (strcmp(flag, "--edit") == 0)) {
         edit_todo_file();
         return EXIT_SUCCESS; 
     }
 
-    if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0)) {
+    if ((strcmp(flag, "-v") == 0) || (strcmp(flag, "--version") == 0)) {
         print_version();
         return EXIT_SUCCESS;
     }
 
+    /* require either '--option' (long), '-o' (short), or '--' (precedes todo item) */
+    if ((flag[0] != '-') || (*strchrnul("-atdox", flag[1]) == '\0')) {
+        fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+        return EXIT_FAILURE;
+    }
+
+    /* can handle concatenated short/numeric options, e.g. -x3 == -x 3 */
+    if (argc == 2) {
+        if (strlen(flag) < 3) {
+            fprintf(stderr, "Error: %s needs a numeric argument.\n", flag);
+            return EXIT_FAILURE;
+        }
+        n = atoi_pedantic(flag+2);
+        if (n == 0) {
+            fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+            return EXIT_FAILURE;
+        }
+
+        switch (flag[1]) {
+            case 'a':
+                print_all(n);
+                break;
+            case 't':
+                print_todo(n);
+                break;
+            case 'd':
+                print_done(n);
+                break;
+            case 'x':
+                mark_done(n);
+                break;
+            case 'o':
+                mark_todo(n);
+                break;
+            default:
+                fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+                return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }
+
+    /* now check flags with parameters */
     if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
-        num_arg = get_numeric_arg(argc, argv);
-        print_all(num_arg);
+        n = get_numeric_arg(argc, argv);
+        print_all(n);
     }
     else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
-        num_arg = get_numeric_arg(argc, argv);
-        print_done(num_arg);
+        n = get_numeric_arg(argc, argv);
+        print_done(n);
     }
     else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
-        num_arg = get_numeric_arg(argc, argv);
-        print_todo(num_arg);
+        n = get_numeric_arg(argc, argv);
+        print_todo(n);
     }
     else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
-        num_arg = get_numeric_arg(argc, argv);
-        mark_done(num_arg);
+        n = get_numeric_arg(argc, argv);
+        mark_done(n);
     }
     else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
-        num_arg = get_numeric_arg(argc, argv);
-        mark_todo(num_arg);
+        n = get_numeric_arg(argc, argv);
+        mark_todo(n);
     }
     else {
         char *message = concat_args(argc-1, &argv[1]);
