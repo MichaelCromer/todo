@@ -293,7 +293,9 @@ void mark_done(int item_num)
         line_num++;
     }
 
-    fptr = freopen(NULL, "w", fptr);
+    fclose(fptr);
+    fptr = todo_file("w");
+
     if (found) {
         fputs(target, fptr);
     }
@@ -340,7 +342,9 @@ void mark_todo(int item_num)
         line_num++;
     }
 
-    fptr = freopen(NULL, "w", fptr);
+    fclose(fptr);
+    fptr = todo_file("w");
+
     for (int i = 0; i < line_num; i++) {
         fputs(lines[i], fptr);
         free(lines[i]);
