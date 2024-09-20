@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
     }
 
     /* require either '--option' (long), '-o' (short), or '--' (precedes todo item) */
-    if ((flag[0] != '-') || (*strchrnul("-atdox", flag[1]) == '\0')) {
+    if ((flag[0] != '-') || (flag[1] == '\0') || (strchr("-atdox", flag[1]) == NULL)) {
         fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
         return EXIT_FAILURE;
     }
