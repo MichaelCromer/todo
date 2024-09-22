@@ -81,7 +81,7 @@ int atoi_pedantic(char *str)
 // squash a list of strings (e.g., make all args into a new todo entry)
 char *concat_args(int nstr, char *strs[])
 {
-    int total_strlen = nstr; // start with #gaps for spaces
+    int total_strlen = nstr-1; // start with #gaps for spaces
     for (int i = 0; i < nstr; i++) {
         total_strlen += strlen(strs[i]);
     }
@@ -89,8 +89,9 @@ char *concat_args(int nstr, char *strs[])
     char *argbuf = malloc((total_strlen + 1) * sizeof(*argbuf));
     argbuf[0] = '\0';
     for (int i=0; i < nstr; i++) {
-        argbuf = strcat(argbuf, " ");
         argbuf = strcat(argbuf, strs[i]);
+        if (i == nstr-1) { break; }
+        argbuf = strcat(argbuf, " ");
     }
 
     return argbuf;
@@ -348,7 +349,7 @@ void add_item(char *item)
 {
     FILE *fptr = todo_file("a");
 
-    fputs("[ ]", fptr);
+    fputs("[ ] ", fptr);
     fputs(item, fptr);
     fputs("\n", fptr);
     fclose(fptr);
@@ -434,6 +435,10 @@ int main(int argc, char *argv[])
             free(message);
         } else {
             /* user is piping, grab from stdin */
+            if (isatty(fileno(stdin))) {
+                fprintf(stderr, "Error: no message supplied after '--'.\n");
+                return EXIT_FAILURE;
+            }
             char line[LINE_MAX];
             int len = 0;
             while (fgets(line, LINE_MAX, stdin)) {
