@@ -1,3 +1,7 @@
 [ ] error handling
 [ ] reconsider how todo text is taken (e.g. use flag?)
 [ ] make incorrect - options fail, rather than record a line item
+[ ]test line 1
+[ ]test line 2
+[ ]test line 3
+[ ]test line 4

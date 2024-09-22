@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
     }
 
     /* can handle concatenated short/numeric options, e.g. -x3 == -x 3 */
-    if (argc == 2) {
+    if ((argc == 2) && (flag[1] != '-')) {
         if (strlen(flag) < 3) {
             fprintf(stderr, "Error: %s needs additional arguments.\n", flag);
             return EXIT_FAILURE;
@@ -426,9 +426,24 @@ int main(int argc, char *argv[])
     }
 
     if (strcmp(flag, "--") == 0) {
-        char *message = concat_args(argc-1, &argv[1]);
-        add_item(message);
-        free(message);
+        /* now test to see what input source */
+        if (argc > 2) {
+            /* user has supplied msg, grab from args */
+            char *message = concat_args(argc-2, &argv[2]);
+            add_item(message);
+            free(message);
+        } else {
+            /* user is piping, grab from stdin */
+            char line[LINE_MAX];
+            int len = 0;
+            while (fgets(line, LINE_MAX, stdin)) {
+                len = strlen(line);
+                if (line[len-1] == '\n') {
+                    line[len-1] = '\0';
+                }
+                add_item(line);
+            }
+        }
         return EXIT_SUCCESS;
     }
 
