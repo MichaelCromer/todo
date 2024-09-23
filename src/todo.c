@@ -185,41 +185,34 @@ bool line_is_done(char *line)
 }
 
 
-// list N todo items
+void print_with_filter(bool (*line_test)(char *line), int max_lines)
+{
+    FILE *fptr = todo_file("r");
+    char line[LINE_MAX];
+    int i = 1;
+
+    while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
+        if (line_test(line)) {
+            printf("\t%d\t%s", i, line);
+            i++;
+        }
+    }
+    fclose(fptr);
+}
+
+
 void print_todo(int max_lines)
 {
-    FILE *fptr = todo_file("r");
-    char line[LINE_MAX];
-    int i = 1;
-
-    while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
-        if (line_is_todo(line)) {
-            printf("\t%d\t%s", i, line);
-            i++;
-        }
-    }
-    fclose(fptr);
+    print_with_filter(line_is_todo, max_lines);
 }
 
 
-// list N done items
 void print_done(int max_lines)
 {
-    FILE *fptr = todo_file("r");
-    char line[LINE_MAX];
-    int i = 1;
-
-    while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
-        if (line_is_done(line)) {
-            printf("\t%d\t%s", i, line);
-            i++;
-        }
-    }
-    fclose(fptr);
+    print_with_filter(line_is_done, max_lines);
 }
 
 
-// list 1) todo items and 2) done items up to N items each
 void print_all(int max_lines)
 {
     print_todo(max_lines);
