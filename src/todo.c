@@ -10,6 +10,7 @@
 */
 
 #include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,7 +30,7 @@
 // send help string to stdout
 void print_help()
 {
-    printf("Usage: todo [OPTION|OPTION N|MESSAGE]\n");
+    printf("Usage: todo [OPTION|OPTION N| -- MESSAGE]\n");
     printf("A command line tool to manage todo items\n");
     printf("\n");
 
@@ -55,7 +56,7 @@ void print_help()
 // send version string to stdout
 void print_version()
 {
-    printf("todo version %s\n", TODO_VERSION);
+    printf("todo version %s by Michael Cromer\n", TODO_VERSION);
 }
 
 
@@ -115,8 +116,7 @@ char *todo_home_path()
 {
     char *homedir = getenv("HOME");
     if (homedir == NULL) {
-        // TODO error handling
-        printf("HOME environment variable not set\n");
+        fprintf(stderr, "Error: HOME environment variable not set\n");
         return NULL;
     }
     char *pathbuf = malloc(strlen(homedir) + 7);
@@ -130,8 +130,8 @@ char *todo_path()
 {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        // TODO error handling
-        printf("Error: cannot open current working directory\n");
+        fprintf(stderr, "Error: cannot open working directory: %s\n", strerror(errno));
+        return NULL;
     }
 
     char *path = malloc(strlen(cwd) + 7);
@@ -155,11 +155,14 @@ char *todo_path()
 FILE *todo_file(char *mode)
 {
     char *fpath = todo_path();
+    if (fpath == NULL) {
+        fprintf(stderr, "Error: cannot open todo file\n");
+        return NULL;
+    }
     FILE *fptr = fopen(fpath, mode);
     if (fptr == NULL) {
-        // TODO error handling
-        printf("Error: cannot open %s\n", fpath);
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Error: cannot open %s: %s\n", fpath, strerror(errno));
+        return NULL;
     }
     free(fpath);
     return fptr;
