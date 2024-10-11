@@ -21,6 +21,7 @@
 
 #define TODO_VERSION "1.0"
 #define TODO_MAX_ITEMLINES 64
+#define TODO_DEFAULT_PRINT_NUM 10
 
 
 /*--------------------------------------------------------------------------------------
@@ -248,46 +249,57 @@ void edit_todo_file()
 void mark_done(int item_num)
 {
     FILE *fptr = todo_file("r");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error: cannot open .todo for reading: %s\n", strerror(errno));
+        return;
+    }
 
     int line_num = 0;
     int count_todo = 0;
     int capacity = TODO_MAX_ITEMLINES;
-    bool found = false;
     char line[LINE_MAX];
-    char target[LINE_MAX];
-    char **lines = malloc(capacity * sizeof(**lines));
+    char *target = NULL;
+    char **lines = malloc(capacity * sizeof(char *));
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_todo(line)) {
             count_todo++;
             if (count_todo == item_num) {
+                target = malloc(strlen(line)+1);
                 strcpy(target, line);
                 target[1] = 'X';
-                found = true;
                 continue;
             }
         }
         if (line_num > capacity) {
             capacity *= 2;
-            lines = realloc(lines, capacity * sizeof(**lines));
+            lines = realloc(lines, capacity * sizeof(char *));
         }
-        lines[line_num] = malloc((strlen(line)+1) * sizeof(*line));
+        lines[line_num] = malloc(strlen(line)+1);
         lines[line_num] = strcpy(lines[line_num], line);
         line_num++;
     }
 
     fclose(fptr);
     fptr = todo_file("w");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error: cannot open .todo for writing: %s\n", strerror(errno));
+        return;
+    }
 
-    if (found) {
+    if (target) {
         fputs(target, fptr);
     }
     for (int i = 0; i < line_num; i++) {
         fputs(lines[i], fptr);
         free(lines[i]);
+        lines[i] = NULL;
     }
-    free(lines);
+
     fclose(fptr);
+    free(lines);
+    fptr = NULL;
+    lines = NULL;
 }
 
 
@@ -297,46 +309,56 @@ void mark_done(int item_num)
 void mark_todo(int item_num)
 {
     FILE *fptr = todo_file("r");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error: cannot open .todo for reading: %s\n", strerror(errno));
+        return;
+    }
 
     int line_num = 0;
     int count_done = 0;
     int capacity = TODO_MAX_ITEMLINES;
-    bool found = false;
     char line[LINE_MAX];
-    char target[LINE_MAX];
-    char **lines = malloc(capacity * sizeof(**lines));
+    char *target = NULL;
+    char **lines = malloc(capacity * sizeof(char *));
 
     while (fgets(line, LINE_MAX, fptr)) {
         if (line_is_done(line)) {
             count_done++;
             if (count_done == item_num) {
+                target = malloc(strlen(line)+1);
                 strcpy(target, line);
                 target[1] = ' ';
-                found = true;
                 continue;
             }
         }
         if (line_num > capacity) {
             capacity *= 2;
-            lines = realloc(lines, capacity * sizeof(**lines));
+            lines = realloc(lines, capacity * sizeof(char *));
         }
-        lines[line_num] = malloc((strlen(line)+1) * sizeof(*line));
+        lines[line_num] = malloc(strlen(line)+1);
         lines[line_num] = strcpy(lines[line_num], line);
         line_num++;
     }
 
     fclose(fptr);
     fptr = todo_file("w");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error: cannot open .todo for writing: %s\n", strerror(errno));
+        return;
+    }
 
     for (int i = 0; i < line_num; i++) {
         fputs(lines[i], fptr);
         free(lines[i]);
     }
-    if (found) {
+    if (target) {
         fputs(target, fptr);
     }
-    free(lines);
+
     fclose(fptr);
+    free(lines);
+    fptr = NULL;
+    lines = NULL;
 }
 
 
@@ -359,7 +381,7 @@ int main(int argc, char *argv[])
 
     /* no args, default : display some todo items */
     if (argc < 2) {
-        print_todo(10);
+        print_todo(TODO_DEFAULT_PRINT_NUM);
         return EXIT_SUCCESS;
     }
 
