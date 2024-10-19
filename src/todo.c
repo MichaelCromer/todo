@@ -49,7 +49,8 @@ void print_help()
     printf("\t-a --print-all\tDisplay -t N, -d N in sequence\n");
     printf("\n");
 
-    printf("Arguments not matching [OPT|OPT N] create a new item\n");
+    printf("Directories are searched upwards for a \'.todo\' file\n");
+    printf("Input after -- is added as new lines, delimited by \\n\n");
     printf("If no arguments are supplied, default is todo -t 10\n");
 }
 
