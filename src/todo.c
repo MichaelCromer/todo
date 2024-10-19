@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,6 +60,18 @@ void print_help()
 void print_version()
 {
     printf("todo version %s by Michael Cromer\n", TODO_VERSION);
+}
+
+
+void print_error(const char *message, ...)
+{
+    va_list args;
+
+    va_start(args, message);
+    fprintf(stderr, "[TODO]  Error: ");
+    vfprintf(stderr, message, args);
+    fprintf(stderr, "\n");
+    va_end(args);
 }
 
 
