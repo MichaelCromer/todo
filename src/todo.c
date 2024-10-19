@@ -131,7 +131,7 @@ char *todo_home_path()
 {
     char *homedir = getenv("HOME");
     if (homedir == NULL) {
-        fprintf(stderr, "Error: HOME environment variable not set\n");
+        print_error("HOME environment variable not set");
         return NULL;
     }
     char *pathbuf = malloc(strlen(homedir) + 7);
@@ -145,7 +145,7 @@ char *todo_path()
 {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        fprintf(stderr, "Error: cannot open working directory: %s\n", strerror(errno));
+        print_error("cannot open working directory: %s", strerror(errno));
         return NULL;
     }
 
@@ -171,12 +171,12 @@ FILE *todo_file(char *mode)
 {
     char *fpath = todo_path();
     if (fpath == NULL) {
-        fprintf(stderr, "Error: cannot open todo file\n");
+        print_error("cannot open todo file");
         return NULL;
     }
     FILE *fptr = fopen(fpath, mode);
     if (fptr == NULL) {
-        fprintf(stderr, "Error: cannot open %s: %s\n", fpath, strerror(errno));
+        print_error("cannot open %s: %s", fpath, strerror(errno));
         return NULL;
     }
     free(fpath);
@@ -264,7 +264,7 @@ void mark_done(int item_num)
 {
     FILE *fptr = todo_file("r");
     if (fptr == NULL) {
-        fprintf(stderr, "Error: cannot open .todo for reading: %s\n", strerror(errno));
+        print_error("cannot open .todo for reading: %s", strerror(errno));
         return;
     }
 
@@ -297,7 +297,7 @@ void mark_done(int item_num)
     fclose(fptr);
     fptr = todo_file("w");
     if (fptr == NULL) {
-        fprintf(stderr, "Error: cannot open .todo for writing: %s\n", strerror(errno));
+        print_error("cannot open .todo for writing: %s", strerror(errno));
         return;
     }
 
@@ -324,7 +324,7 @@ void mark_todo(int item_num)
 {
     FILE *fptr = todo_file("r");
     if (fptr == NULL) {
-        fprintf(stderr, "Error: cannot open .todo for reading: %s\n", strerror(errno));
+        print_error("cannot open .todo for reading: %s", strerror(errno));
         return;
     }
 
@@ -357,7 +357,7 @@ void mark_todo(int item_num)
     fclose(fptr);
     fptr = todo_file("w");
     if (fptr == NULL) {
-        fprintf(stderr, "Error: cannot open .todo for writing: %s\n", strerror(errno));
+        print_error("Cannot open .todo for writing: %s", strerror(errno));
         return;
     }
 
@@ -386,6 +386,11 @@ void add_item(char *item)
     fputs("\n", fptr);
     fclose(fptr);
 }
+
+
+/*
+ *  Main and inputs
+ */
 
 
 int main(int argc, char *argv[])
@@ -419,19 +424,19 @@ int main(int argc, char *argv[])
 
     /* require either '--option' (long), '-o' (short), or '--' (precedes todo item) */
     if ((flag[0] != '-') || (flag[1] == '\0') || (strchr("-atdox", flag[1]) == NULL)) {
-        fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+        print_error("%s not recognised as a todo option.", flag);
         return EXIT_FAILURE;
     }
 
     /* can handle concatenated short/numeric options, e.g. -x3 == -x 3 */
     if ((argc == 2) && (flag[1] != '-')) {
         if (strlen(flag) < 3) {
-            fprintf(stderr, "Error: %s needs additional arguments.\n", flag);
+            print_error("%s needs additional arguments.", flag);
             return EXIT_FAILURE;
         }
         n = atoi_pedantic(flag+2);
         if (n == 0) {
-            fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+            print_error("%s not recognised as a todo option.", flag);
             return EXIT_FAILURE;
         }
 
@@ -452,7 +457,7 @@ int main(int argc, char *argv[])
                 mark_todo(n);
                 break;
             default:
-                fprintf(stderr, "Error: %s not recognised as a todo option.\n", flag);
+                print_error("%s not recognised as a todo option.", flag);
                 return EXIT_FAILURE;
         }
         return EXIT_SUCCESS;
@@ -468,7 +473,7 @@ int main(int argc, char *argv[])
         } else {
             /* user is piping, grab from stdin */
             if (isatty(fileno(stdin))) {
-                fprintf(stderr, "Error: no message supplied after '--'.\n");
+                print_error("no message supplied after '--'.");
                 return EXIT_FAILURE;
             }
             char line[LINE_MAX];
@@ -486,7 +491,7 @@ int main(int argc, char *argv[])
 
     n = atoi_pedantic(argv[2]);
     if (n == 0) {
-        fprintf(stderr, "Error: %s needs a numeric argument.\n", flag);
+        print_error("%s needs a numeric argument.", flag);
         return EXIT_FAILURE;
     }
 
