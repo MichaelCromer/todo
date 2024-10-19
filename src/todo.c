@@ -24,6 +24,38 @@
 #define TODO_MAX_ITEMLINES 64
 #define TODO_DEFAULT_PRINT_NUM 10
 
+#define FLAG_HELP_SHORT     "-h"
+#define FLAG_HELP_LONG      "--help"
+#define FLAG_EDIT_SHORT     "-e"
+#define FLAG_EDIT_LONG      "--edit"
+#define FLAG_VERSION_SHORT  "-v"
+#define FLAG_VERSION_LONG   "--version"
+
+#define FLAG_ALL_SHORT      "-a"
+#define FLAG_ALL_LONG       "--print-all"
+#define FLAG_TODO_SHORT     "-t"
+#define FLAG_TODO_LONG      "--print-todo"
+#define FLAG_DONE_SHORT     "-d"
+#define FLAG_DONE_LONG      "--print-done"
+
+#define FLAG_MARK_SHORT     "-x"
+#define FLAG_MARK_LONG      "--done"
+#define FLAG_UNMARK_SHORT   "-o"
+#define FLAG_UNMARK_SHORT   "--todo"
+
+
+enum TODO_ACTION {
+    NONE,
+    HELP,
+    EDIT,
+    VERSION,
+    ALL,
+    TODO,
+    DONE,
+    MARK,
+    UNMARK
+};
+
 
 /*--------------------------------------------------------------------------------------
     -h etc
