@@ -381,6 +381,8 @@ enum TODO_ACTION input_option_parse(char *option)
     } else if ( (strncmp(option, FLAG_UNMARK_SHORT, 2) == 0) ||
                 (strcmp( option, FLAG_UNMARK_LONG    ) == 0)) {
         return ACTION_UNMARK;
+    } else if (strcmp(option, FLAG_CAPTURE) == 0) {
+        return ACTION_CAPTURE;
     }
 
     return ACTION_NONE;
