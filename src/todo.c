@@ -24,6 +24,9 @@
 #define TODO_MAX_ITEMLINES 64
 #define TODO_DEFAULT_PRINT_NUM 10
 
+#define TODO_CHAR_MARK_DONE 'X'
+#define TODO_CHAR_MARK_TODO ' '
+
 #define FLAG_HELP_SHORT     "-h"
 #define FLAG_HELP_LONG      "--help"
 #define FLAG_EDIT_SHORT     "-e"
@@ -41,19 +44,21 @@
 #define FLAG_MARK_SHORT     "-x"
 #define FLAG_MARK_LONG      "--done"
 #define FLAG_UNMARK_SHORT   "-o"
-#define FLAG_UNMARK_SHORT   "--todo"
+#define FLAG_UNMARK_LONG    "--todo"
 
+#define FLAG_CAPTURE        "--"
 
 enum TODO_ACTION {
-    NONE,
-    HELP,
-    EDIT,
-    VERSION,
-    ALL,
-    TODO,
-    DONE,
-    MARK,
-    UNMARK
+    ACTION_NONE,
+    ACTION_HELP,
+    ACTION_EDIT,
+    ACTION_VERSION,
+    ACTION_ALL,
+    ACTION_TODO,
+    ACTION_DONE,
+    ACTION_MARK,
+    ACTION_UNMARK,
+    ACTION_CAPTURE
 };
 
 
