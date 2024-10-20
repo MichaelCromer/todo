@@ -118,14 +118,14 @@ void print_error(const char *message, ...)
 
 
 // get numeric input carefully - don't want e.g., '123abc' to return 123
-int atoi_pedantic(char *str)
+unsigned int atoi_pedantic(char *str)
 {
-    int result = 0;
+    unsigned int result = 0;
     for (int i=0; str[i] != '\0'; i++) {
         if (!isdigit((unsigned char) str[i])) {
             return 0;
         }
-        result = 10*result + (str[i] - '0');
+        result = 10*result + (unsigned int)(str[i] - '0');
     }
     return result;
 }
@@ -256,22 +256,16 @@ void print_with_filter(bool (*line_test)(char *line), int max_lines)
 }
 
 
-void print_todo(int max_lines)
+void print_lines(enum TODO_ACTION action, int max_lines)
 {
-    print_with_filter(line_is_todo, max_lines);
-}
+    if (action == ACTION_TODO || action == ACTION_ALL) {
+        print_with_filter(line_is_todo, max_lines);
+    }
+    if (action == ACTION_DONE || action == ACTION_ALL) {
+        print_with_filter(line_is_done, max_lines);
+    }
 
-
-void print_done(int max_lines)
-{
-    print_with_filter(line_is_done, max_lines);
-}
-
-
-void print_all(int max_lines)
-{
-    print_todo(max_lines);
-    print_done(max_lines);
+    return;
 }
 
 
@@ -294,132 +288,80 @@ void edit_todo_file()
 }
 
 
-// set the Nth todo item as done
-// implementation of "sorting" algorithm:
-//      newly done items are moved to the top
-void mark_done(int item_num)
+void mark_line(enum TODO_ACTION action, int target_line_num)
 {
     FILE *fptr = todo_file("r");
-    if (fptr == NULL) {
-        print_error("cannot open .todo for reading: %s", strerror(errno));
-        return;
+    bool (*line_test)(char *line) = NULL;
+    int curr_line_num = 0,
+        target_count = 0,
+        capacity = TODO_MAX_ITEMLINES;
+    char mark = '\0',
+         line[LINE_MAX],
+         *target_line = NULL,
+         **lines = malloc(capacity * sizeof(char *));
+
+    switch (action) {
+        case ACTION_MARK:
+            line_test = line_is_todo;
+            mark = TODO_CHAR_MARK_DONE;
+            break;
+        case ACTION_UNMARK:
+            line_test = line_is_done;
+            mark = TODO_CHAR_MARK_TODO;
+            break;
+        default:
+            return;
     }
 
-    int line_num = 0;
-    int count_todo = 0;
-    int capacity = TODO_MAX_ITEMLINES;
-    char line[LINE_MAX];
-    char *target = NULL;
-    char **lines = malloc(capacity * sizeof(char *));
-
     while (fgets(line, LINE_MAX, fptr)) {
-        if (line_is_todo(line)) {
-            count_todo++;
-            if (count_todo == item_num) {
-                target = malloc(strlen(line)+1);
-                strcpy(target, line);
-                target[1] = 'X';
+        if (line_test(line)) {
+            target_count++;
+            if (target_count == target_line_num) {
+                target_line = malloc(strlen(line)+1);
+                strcpy(target_line, line);
+                target_line[1] = mark;
                 continue;
             }
         }
-        if (line_num > capacity) {
+        if (curr_line_num > capacity) {
             capacity *= 2;
             lines = realloc(lines, capacity * sizeof(char *));
         }
-        lines[line_num] = malloc(strlen(line)+1);
-        lines[line_num] = strcpy(lines[line_num], line);
-        line_num++;
+        lines[curr_line_num] = malloc(strlen(line)+1);
+        strcpy(lines[curr_line_num], line);
+        curr_line_num++;
     }
 
     fclose(fptr);
     fptr = todo_file("w");
-    if (fptr == NULL) {
-        print_error("cannot open .todo for writing: %s", strerror(errno));
-        return;
-    }
 
-    if (target) {
-        fputs(target, fptr);
+    if (target_line && action == ACTION_MARK) {
+        fputs(target_line, fptr);
     }
-    for (int i = 0; i < line_num; i++) {
+    for (int i = 0; i < curr_line_num; i++) {
         fputs(lines[i], fptr);
         free(lines[i]);
         lines[i] = NULL;
     }
-
-    fclose(fptr);
-    free(lines);
-    fptr = NULL;
-    lines = NULL;
-}
-
-
-// set the Nth done item as todo
-// implementation of "sorting" algorithm:
-//      newest todo items are put/moved to the bottom
-void mark_todo(int item_num)
-{
-    FILE *fptr = todo_file("r");
-    if (fptr == NULL) {
-        print_error("cannot open .todo for reading: %s", strerror(errno));
-        return;
-    }
-
-    int line_num = 0;
-    int count_done = 0;
-    int capacity = TODO_MAX_ITEMLINES;
-    char line[LINE_MAX];
-    char *target = NULL;
-    char **lines = malloc(capacity * sizeof(char *));
-
-    while (fgets(line, LINE_MAX, fptr)) {
-        if (line_is_done(line)) {
-            count_done++;
-            if (count_done == item_num) {
-                target = malloc(strlen(line)+1);
-                strcpy(target, line);
-                target[1] = ' ';
-                continue;
-            }
-        }
-        if (line_num > capacity) {
-            capacity *= 2;
-            lines = realloc(lines, capacity * sizeof(char *));
-        }
-        lines[line_num] = malloc(strlen(line)+1);
-        lines[line_num] = strcpy(lines[line_num], line);
-        line_num++;
-    }
-
-    fclose(fptr);
-    fptr = todo_file("w");
-    if (fptr == NULL) {
-        print_error("Cannot open .todo for writing: %s", strerror(errno));
-        return;
-    }
-
-    for (int i = 0; i < line_num; i++) {
-        fputs(lines[i], fptr);
-        free(lines[i]);
-    }
-    if (target) {
-        fputs(target, fptr);
+    if (target_line && action == ACTION_UNMARK) {
+        fputs(target_line, fptr);
     }
 
     fclose(fptr);
     free(lines);
     fptr = NULL;
     lines = NULL;
+
 }
 
 
 // append an appropriately formatted todo item
-void add_item(char *item)
+void add_line(char *line)
 {
     FILE *fptr = todo_file("a");
 
     fputs("[ ] ", fptr);
-    fputs(item, fptr);
+    fputs(line, fptr);
     fputs("\n", fptr);
     fclose(fptr);
 }
@@ -430,126 +372,140 @@ void add_item(char *item)
  */
 
 
+enum TODO_ACTION input_option_parse(char *option)
+{
+    if        ( (strncmp(option, FLAG_HELP_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_HELP_LONG    ) == 0)) {
+        return ACTION_HELP;
+    } else if ( (strncmp(option, FLAG_EDIT_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_EDIT_LONG    ) == 0)) {
+        return ACTION_EDIT;
+    } else if ( (strncmp(option, FLAG_VERSION_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_VERSION_LONG    ) == 0)) {
+        return ACTION_VERSION;
+    } else if ( (strncmp(option, FLAG_ALL_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_ALL_LONG    ) == 0)) {
+        return ACTION_ALL;
+    } else if ( (strncmp(option, FLAG_TODO_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_TODO_LONG    ) == 0)) {
+        return ACTION_TODO;
+    } else if ( (strncmp(option, FLAG_DONE_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_DONE_LONG    ) == 0)) {
+        return ACTION_DONE;
+    } else if ( (strncmp(option, FLAG_MARK_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_MARK_LONG    ) == 0)) {
+        return ACTION_MARK;
+    } else if ( (strncmp(option, FLAG_UNMARK_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_UNMARK_LONG    ) == 0)) {
+        return ACTION_UNMARK;
+    }
+
+    return ACTION_NONE;
+}
+
+
+int input_numeric_parse(char *primary, char *fallback, int *fallback_ticker)
+{
+    int n = 0;
+
+    if (primary) {
+        n = atoi_pedantic(primary);
+    }
+
+    if (n == 0 && fallback) {
+        n = atoi_pedantic(fallback);
+        if (fallback_ticker) {
+            (*fallback_ticker)++;
+        }
+    }
+
+    return n;
+}
+
+
+void input_stdin()
+{
+    char line[LINE_MAX];
+    int len = 0;
+    while (fgets(line, LINE_MAX, stdin)) {
+        len = strlen(line);
+        if (line[len-1] == '\n') {
+            line[len-1] = '\0';
+        }
+        add_line(line);
+    }
+    return;
+}
+
 int main(int argc, char *argv[])
 {
-    char *flag;
-    int n;
-
     /* no args, default : display some todo items */
     if (argc < 2) {
-        print_todo(TODO_DEFAULT_PRINT_NUM);
+        print_lines(ACTION_TODO, TODO_DEFAULT_PRINT_NUM);
         return EXIT_SUCCESS;
     }
 
-    flag = argv[1];
+    for (int i=1; i < argc; i++) {
+        char *curr_option = argv[i];
+        enum TODO_ACTION curr_action = input_option_parse(curr_option);
 
-    /* exact match on particular flags */
-    if ((strcmp(flag, "-h") == 0) || (strcmp(flag, "--help") == 0)) {
-        print_help();
-        return EXIT_SUCCESS;
-    }
+        /* prepare to grab potential numeric input.
+         * either from -oN or -o N or --option N */
+        unsigned int curr_num = input_numeric_parse(
+            ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
+            ( (i+1)<argc )          ? argv[i+1]     : NULL,
+            &i /* will do i++ if we needed to grab the 2nd argument */
+        );
 
-    if ((strcmp(flag, "-e") == 0) || (strcmp(flag, "--edit") == 0)) {
-        edit_todo_file();
-        return EXIT_SUCCESS; 
-    }
+        switch (curr_action) {
+            /* -h etc flags */
+            case ACTION_HELP:
+                print_help();
+                return EXIT_SUCCESS;
+            case ACTION_EDIT:
+                edit_todo_file();
+                return EXIT_SUCCESS;
+            case ACTION_VERSION:
+                print_version();
+                return EXIT_SUCCESS;
 
-    if ((strcmp(flag, "-v") == 0) || (strcmp(flag, "--version") == 0)) {
-        print_version();
-        return EXIT_SUCCESS;
-    }
-
-    /* require either '--option' (long), '-o' (short), or '--' (precedes todo item) */
-    if ((flag[0] != '-') || (flag[1] == '\0') || (strchr("-atdox", flag[1]) == NULL)) {
-        print_error("%s not recognised as a todo option.", flag);
-        return EXIT_FAILURE;
-    }
-
-    /* can handle concatenated short/numeric options, e.g. -x3 == -x 3 */
-    if ((argc == 2) && (flag[1] != '-')) {
-        if (strlen(flag) < 3) {
-            print_error("%s needs additional arguments.", flag);
-            return EXIT_FAILURE;
-        }
-        n = atoi_pedantic(flag+2);
-        if (n == 0) {
-            print_error("%s not recognised as a todo option.", flag);
-            return EXIT_FAILURE;
-        }
-
-        switch (flag[1]) {
-            case 'a':
-                print_all(n);
-                break;
-            case 't':
-                print_todo(n);
-                break;
-            case 'd':
-                print_done(n);
-                break;
-            case 'x':
-                mark_done(n);
-                break;
-            case 'o':
-                mark_todo(n);
-                break;
-            default:
-                print_error("%s not recognised as a todo option.", flag);
-                return EXIT_FAILURE;
-        }
-        return EXIT_SUCCESS;
-    }
-
-    if (strcmp(flag, "--") == 0) {
-        /* now test to see what input source */
-        if (argc > 2) {
-            /* user has supplied msg, grab from args */
-            char *message = concat_args(argc-2, &argv[2]);
-            add_item(message);
-            free(message);
-        } else {
-            /* user is piping, grab from stdin */
-            if (isatty(fileno(stdin))) {
-                print_error("no message supplied after '--'.");
-                return EXIT_FAILURE;
-            }
-            char line[LINE_MAX];
-            int len = 0;
-            while (fgets(line, LINE_MAX, stdin)) {
-                len = strlen(line);
-                if (line[len-1] == '\n') {
-                    line[len-1] = '\0';
+            /* printing items from the file */
+            case ACTION_ALL:
+            case ACTION_TODO:
+            case ACTION_DONE:
+                if (!curr_num) {
+                    print_error("%s needs a numeric argument", curr_option);
+                    return EXIT_FAILURE;
                 }
-                add_item(line);
-            }
+                print_lines(curr_action, curr_num);
+                break;
+
+            /* marking a line item todo/done */
+            case ACTION_MARK:
+            case ACTION_UNMARK:
+                if (!curr_num) {
+                    print_error("%s needs a numeric argument", curr_option);
+                    return EXIT_FAILURE;
+                }
+                mark_line(curr_action, curr_num);
+                break;
+
+            /* capturing the remaining input */
+            case ACTION_CAPTURE:
+                if (!isatty(fileno(stdin))) {
+                    input_stdin();
+                    return EXIT_SUCCESS;
+                }
+                char *message = concat_args(argc-i, &argv[i+1]);
+                add_line(message);
+                free(message);
+                return EXIT_SUCCESS;
+
+            /* fail state */
+            default:
+                print_error("%s is not a recognised todo option", curr_option);
+                return EXIT_FAILURE;
         }
-        return EXIT_SUCCESS;
-    }
-
-    n = atoi_pedantic(argv[2]);
-    if (n == 0) {
-        print_error("%s needs a numeric argument.", flag);
-        return EXIT_FAILURE;
-    }
-
-    /* now check flags with parameters */
-    if ((strcmp(flag, "-a") == 0) || (strcmp(flag, "--print-all") == 0)) {
-        print_all(n);
-    }
-    else if ((strcmp(flag, "-d") == 0) || (strcmp(flag, "--print-done") == 0)) {
-        print_done(n);
-    }
-    else if ((strcmp(flag, "-t") == 0) || (strcmp(flag, "--print-todo") == 0)) {
-        print_todo(n);
-    }
-    else if ((strcmp(flag, "-x") == 0) || (strcmp(flag, "--done") == 0)) {
-        mark_done(n);
-    }
-    else if ((strcmp(flag, "-o") == 0) || (strcmp(flag, "--todo") == 0)) {
-        mark_todo(n);
-    }
-    else {
-
     }
 
     return EXIT_SUCCESS;
