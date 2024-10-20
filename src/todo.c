@@ -160,20 +160,6 @@ bool file_exists(char *file_path)
 }
 
 
-// return the path of the .todo file in the home directory
-char *todo_home_path()
-{
-    char *homedir = getenv("HOME");
-    if (homedir == NULL) {
-        print_error("HOME environment variable not set");
-        return NULL;
-    }
-    char *pathbuf = malloc(strlen(homedir) + 7);
-    sprintf(pathbuf, "%s/.todo", homedir);
-    return pathbuf;
-}
-
-
 // dynamically source the right .todo file recursively in tree
 char *todo_path()
 {
@@ -196,7 +182,7 @@ char *todo_path()
         if (strlen(cwd) == 0) { break; }
     }
 
-    return todo_home_path();
+    return NULL;
 }
 
 
