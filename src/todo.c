@@ -486,7 +486,11 @@ int main(int argc, char *argv[])
                     input_stdin();
                     return EXIT_SUCCESS;
                 }
-                char *message = concat_args(argc-i, &argv[i+1]);
+                if ((i+1) >= argc) {
+                    print_error("expected input after %s delimiter", FLAG_CAPTURE);
+                    return EXIT_FAILURE;
+                }
+                char *message = concat_args(argc-(i+1), &argv[i+1]);
                 add_line(message);
                 free(message);
                 return EXIT_SUCCESS;
