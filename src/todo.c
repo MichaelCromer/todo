@@ -433,14 +433,7 @@ int main(int argc, char *argv[])
     for (int i=1; i < argc; i++) {
         char *curr_option = argv[i];
         enum TODO_ACTION curr_action = input_option_parse(curr_option);
-
-        /* prepare to grab potential numeric input.
-         * either from -oN or -o N or --option N */
-        unsigned int curr_num = input_numeric_parse(
-            ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
-            ( (i+1)<argc )          ? argv[i+1]     : NULL,
-            &i /* will do i++ if we needed to grab the 2nd argument */
-        );
+        unsigned int curr_num = 0;
 
         switch (curr_action) {
             /* -h etc flags */
@@ -458,6 +451,12 @@ int main(int argc, char *argv[])
             case ACTION_ALL:
             case ACTION_TODO:
             case ACTION_DONE:
+                curr_num = input_numeric_parse(
+                        ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
+                        ( (i+1)<argc )          ? argv[i+1]     : NULL,
+                        &i
+                        );
+
                 if (!curr_num) {
                     print_error("%s needs a numeric argument", curr_option);
                     return EXIT_FAILURE;
@@ -468,6 +467,12 @@ int main(int argc, char *argv[])
             /* marking a line item todo/done */
             case ACTION_MARK:
             case ACTION_UNMARK:
+                curr_num = input_numeric_parse(
+                        ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
+                        ( (i+1)<argc )          ? argv[i+1]     : NULL,
+                        &i
+                        );
+
                 if (!curr_num) {
                     print_error("%s needs a numeric argument", curr_option);
                     return EXIT_FAILURE;
