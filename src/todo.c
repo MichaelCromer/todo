@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------------------
     todo - a command line tool to manage todo items
 ----------------------------------------------------------------------------------------
-    mcromer, Aug 2024
+    mcromer, Oct 2024
 ========================================================================================
 */
 
@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define TODO_VERSION "1.0"
+#define TODO_VERSION "1.5"
 #define TODO_MAX_ITEMLINES 64
 #define TODO_DEFAULT_PRINT_NUM 10
 
@@ -33,19 +33,16 @@
 #define FLAG_EDIT_LONG      "--edit"
 #define FLAG_VERSION_SHORT  "-v"
 #define FLAG_VERSION_LONG   "--version"
-
 #define FLAG_ALL_SHORT      "-a"
 #define FLAG_ALL_LONG       "--print-all"
 #define FLAG_TODO_SHORT     "-t"
 #define FLAG_TODO_LONG      "--print-todo"
 #define FLAG_DONE_SHORT     "-d"
 #define FLAG_DONE_LONG      "--print-done"
-
 #define FLAG_MARK_SHORT     "-x"
 #define FLAG_MARK_LONG      "--done"
 #define FLAG_UNMARK_SHORT   "-o"
 #define FLAG_UNMARK_LONG    "--todo"
-
 #define FLAG_CAPTURE        "--"
 
 enum TODO_ACTION {
@@ -88,8 +85,9 @@ void print_help()
     printf("\n");
 
     printf("Directories are searched upwards for a \'.todo\' file\n");
-    printf("Input after -- is added as new lines, delimited by \\n\n");
-    printf("If no arguments are supplied, default is todo -t 10\n");
+    printf("Input after -- is added as new items, delimited by \\n\n");
+    printf("If no arguments are supplied, default is todo -t %d\n",
+            TODO_DEFAULT_PRINT_NUM);
 }
 
 
@@ -110,7 +108,6 @@ void print_error(const char *message, ...)
     fprintf(stderr, "\n");
     va_end(args);
 }
-
 
 /*--------------------------------------------------------------------------------------
     Input
