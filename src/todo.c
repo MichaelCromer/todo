@@ -191,7 +191,6 @@ FILE *todo_file(char *mode)
 {
     char *fpath = todo_path();
     if (fpath == NULL) {
-        print_error("cannot open todo file");
         return NULL;
     }
     FILE *fptr = fopen(fpath, mode);
@@ -225,9 +224,14 @@ bool line_is_done(char *line)
 
 void print_with_filter(bool (*line_test)(char *line), int max_lines)
 {
-    FILE *fptr = todo_file("r");
     char line[LINE_MAX];
     int i = 1;
+
+    FILE *fptr = todo_file("r");
+    if (!fptr) {
+        print_error("cannot find todo file");
+        return;
+    }
 
     while ((i <= max_lines) && (fgets(line, LINE_MAX, fptr))) {
         if (line_test(line)) {
@@ -260,6 +264,11 @@ void print_lines(enum TODO_ACTION action, int max_lines)
 void edit_todo_file()
 {
     char *fpath = todo_path();
+    if (!fpath) {
+        print_error("cannot find todo file");
+        return;
+    }
+
     char *editor = getenv("EDITOR");
     if (editor == NULL) {
         editor = "vi";
@@ -273,7 +282,6 @@ void edit_todo_file()
 
 void mark_line(enum TODO_ACTION action, int target_line_num)
 {
-    FILE *fptr = todo_file("r");
     bool (*line_test)(char *line) = NULL;
     int curr_line_num = 0,
         target_count = 0,
@@ -282,6 +290,11 @@ void mark_line(enum TODO_ACTION action, int target_line_num)
          line[LINE_MAX],
          *target_line = NULL,
          **lines = malloc(capacity * sizeof(char *));
+    FILE *fptr = todo_file("r");
+    if (!fptr) {
+        print_error("cannot find todo file");
+        return;
+    }
 
     switch (action) {
         case ACTION_MARK:
@@ -317,6 +330,10 @@ void mark_line(enum TODO_ACTION action, int target_line_num)
 
     fclose(fptr);
     fptr = todo_file("w");
+    if (!fptr) {
+        print_error("cannot find todo file");
+        return;
+    }
 
     if (target_line && action == ACTION_MARK) {
         fputs(target_line, fptr);
@@ -342,6 +359,10 @@ void mark_line(enum TODO_ACTION action, int target_line_num)
 void add_line(char *line)
 {
     FILE *fptr = todo_file("a");
+    if (!fptr) {
+        print_error("cannot find todo file");
+        return;
+    }
 
     fputs("[ ] ", fptr);
     fputs(line, fptr);
