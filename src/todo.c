@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------------------
     todo - a command line tool to manage todo items
 ----------------------------------------------------------------------------------------
-    mcromer, Oct 2024
+    mcromer, Jan 2025
 ========================================================================================
 */
 
@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define TODO_VERSION "1.5"
+#define TODO_VERSION "1.6"
 #define TODO_MAX_ITEMLINES 64
 #define TODO_DEFAULT_PRINT_NUM 10
 
@@ -43,7 +43,9 @@
 #define FLAG_MARK_LONG      "--done"
 #define FLAG_UNMARK_SHORT   "-o"
 #define FLAG_UNMARK_LONG    "--todo"
-#define FLAG_CAPTURE        "--"
+#define FLAG_STDIN          "--"
+#define FLAG_NEW_SHORT      "-m"
+#define FLAG_NEW_LONG       "--message"
 
 enum TODO_ACTION {
     ACTION_NONE,
@@ -55,7 +57,8 @@ enum TODO_ACTION {
     ACTION_DONE,
     ACTION_MARK,
     ACTION_UNMARK,
-    ACTION_CAPTURE
+    ACTION_STDIN,
+    ACTION_NEW
 };
 
 
@@ -66,7 +69,9 @@ enum TODO_ACTION {
 // send help string to stdout
 void print_help()
 {
-    printf("Usage: todo [OPTION|OPTION N| -- MESSAGE]\n");
+    printf("\n");
+    printf("Usage: todo [OPTION|OPTION arg] [--]\n");
+    printf("\n");
     printf("A command line tool to manage todo items\n");
     printf("\n");
 
@@ -84,9 +89,13 @@ void print_help()
     printf("\t-a --print-all\tDisplay -t N, -d N in sequence\n");
     printf("\n");
 
+    printf("  Option \"STRING\"\n");
+    printf("\t-m --message\tRecord a new todo item\n");
+    printf("\n");
+
     printf("Directories are searched upwards for a \'.todo\' file\n");
-    printf("Input after -- is added as new items, delimited by \\n\n");
-    printf("If no arguments are supplied, default is todo -t %d\n",
+    printf("Input after -- is read from stdin, ignoring blank lines\n");
+    printf("If no arguments are supplied, default is todo -t%d\n",
             TODO_DEFAULT_PRINT_NUM);
 }
 
@@ -402,8 +411,11 @@ enum TODO_ACTION input_option_parse(char *option)
     } else if ( (strncmp(option, FLAG_UNMARK_SHORT, 2) == 0) ||
                 (strcmp( option, FLAG_UNMARK_LONG    ) == 0)) {
         return ACTION_UNMARK;
-    } else if (strcmp(option, FLAG_CAPTURE) == 0) {
-        return ACTION_CAPTURE;
+    } else if ( (strncmp(option, FLAG_NEW_SHORT, 2) == 0) ||
+                (strcmp( option, FLAG_NEW_LONG    ) == 0)) {
+        return ACTION_NEW;
+    } else if (strcmp(option, FLAG_STDIN) == 0) {
+        return ACTION_STDIN;
     }
 
     return ACTION_NONE;
@@ -438,7 +450,9 @@ void input_stdin()
         if (line[len-1] == '\n') {
             line[len-1] = '\0';
         }
-        add_line(line);
+        if (strlen(line) > 0) {
+            add_line(line);
+        }
     }
     return;
 }
@@ -502,18 +516,21 @@ int main(int argc, char *argv[])
                 break;
 
             /* capturing the remaining input */
-            case ACTION_CAPTURE:
-                if (!isatty(fileno(stdin))) {
-                    input_stdin();
-                    return EXIT_SUCCESS;
-                }
-                if ((i+1) >= argc) {
-                    print_error("expected input after %s delimiter", FLAG_CAPTURE);
+            case ACTION_STDIN:
+                if ((i+1) < argc) {
+                    print_error("unexpected input after %s delimiter", FLAG_STDIN);
                     return EXIT_FAILURE;
                 }
-                char *message = concat_args(argc-(i+1), &argv[i+1]);
-                add_line(message);
-                free(message);
+                input_stdin();
+                return EXIT_SUCCESS;
+                
+
+            case ACTION_NEW: 
+                if ((i+1) >= argc) {
+                    print_error("%s needs a string argument", argv[i]);
+                    return EXIT_FAILURE;
+                }
+                add_line(argv[i+1]);
                 return EXIT_SUCCESS;
 
             /* fail state */
