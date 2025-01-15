@@ -136,27 +136,6 @@ unsigned int atoi_pedantic(char *str)
     return result;
 }
 
-
-// squash a list of strings (e.g., make all args into a new todo entry)
-char *concat_args(int nstr, char *strs[])
-{
-    int total_strlen = nstr-1; // start with #gaps for spaces
-    for (int i = 0; i < nstr; i++) {
-        total_strlen += strlen(strs[i]);
-    }
-
-    char *argbuf = malloc((total_strlen + 1) * sizeof(*argbuf));
-    argbuf[0] = '\0';
-    for (int i=0; i < nstr; i++) {
-        argbuf = strcat(argbuf, strs[i]);
-        if (i == nstr-1) { break; }
-        argbuf = strcat(argbuf, " ");
-    }
-
-    return argbuf;
-}
-
-
 /*--------------------------------------------------------------------------------------
     File
 */
