@@ -94,8 +94,8 @@ void print_help()
     printf("\n");
 
     printf("Directories are searched upwards for a \'.todo\' file\n");
-    printf("Input after -- is read from stdin, ignoring blank lines\n");
-    printf("If no arguments are supplied, default is todo -t%d\n",
+    printf("Input after -- read from stdin, ignoring blank lines\n");
+    printf("If no arguments supplied, default is todo -t%d\n",
             TODO_DEFAULT_PRINT_NUM);
 }
 
@@ -461,7 +461,7 @@ int main(int argc, char *argv[])
                 print_version();
                 return EXIT_SUCCESS;
 
-            /* printing items from the file */
+            /* printing items from the file or marking a line item todo/done */
             case ACTION_ALL:
             case ACTION_TODO:
             case ACTION_DONE:
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
                 }
                 break;
 
-            /* capturing the remaining input */
+            /* capturing lines from stdin */
             case ACTION_STDIN:
                 if ((i+1) < argc) {
                     print_error("unexpected input after %s delimiter", FLAG_STDIN);
@@ -497,9 +497,9 @@ int main(int argc, char *argv[])
                 }
                 input_stdin();
                 return EXIT_SUCCESS;
-                
 
-            case ACTION_NEW: 
+            /* record a string as a single new todo item */
+            case ACTION_NEW:
                 if ((i+1) >= argc) {
                     print_error("%s needs a string argument", argv[i]);
                     return EXIT_FAILURE;
