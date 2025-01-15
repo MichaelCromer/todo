@@ -465,33 +465,28 @@ int main(int argc, char *argv[])
             case ACTION_ALL:
             case ACTION_TODO:
             case ACTION_DONE:
-                curr_num = input_numeric_parse(
-                        ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
-                        ( (i+1)<argc )          ? argv[i+1]     : NULL,
-                        &i
-                        );
-
-                if (!curr_num) {
-                    print_error("%s needs a numeric argument", curr_option);
-                    return EXIT_FAILURE;
-                }
-                print_lines(curr_action, curr_num);
-                break;
-
-            /* marking a line item todo/done */
             case ACTION_MARK:
             case ACTION_UNMARK:
                 curr_num = input_numeric_parse(
-                        ( strlen(curr_option) > 1 )    ? curr_option + 2      : NULL,
-                        ( (i+1)<argc )          ? argv[i+1]     : NULL,
-                        &i
-                        );
+                    (strlen(curr_option) > 1)
+                        ? curr_option + 2
+                        : NULL,
+                    ((i+1)<argc)
+                        ? argv[i+1]
+                        : NULL,
+                    &i
+                );
 
                 if (!curr_num) {
                     print_error("%s needs a numeric argument", curr_option);
                     return EXIT_FAILURE;
                 }
-                mark_line(curr_action, curr_num);
+
+                if ((curr_action == ACTION_MARK) || (curr_action == ACTION_UNMARK)) {
+                    mark_line(curr_action, curr_num);
+                } else {
+                    print_lines(curr_action, curr_num);
+                }
                 break;
 
             /* capturing the remaining input */
