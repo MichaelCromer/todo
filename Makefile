@@ -1,27 +1,34 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -g
+CFLAGS = -Wall -Wextra -pedantic
 
-SRCDIR = src
-BLDDIR = build
+DIR_SRC = src
+DIR_BLD = build
+DIR_OBJ = $(DIR_BLD)/obj
 TARGET = todo
-TODO_INSTALL_DIR ?= /usr/local/bin/
 
-SRC = $(wildcard $(SRCDIR)/*.c)
-OBJ = $(SRC:%.c=$(BLDDIR)/%.o)
+SRC = $(wildcard $(DIR_SRC)/*.c)
+OBJ = $(SRC:$(DIR_SRC)/%.c=$(DIR_OBJ)/%.o)
 
-$(BLDDIR)/$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@
 
-$(BLDDIR)/%.o: %.c
-	mkdir -p $(dir $@)
+$(DIR_BLD)/$(TARGET): $(OBJ) | $(DIR_BLD)
+	$(CC) $(CFLAGS) $(OBJ) -o $@
+
+
+$(DIR_OBJ)/%.o: $(DIR_SRC)/%.c | $(DIR_OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: install
-install:
-	echo "$(TODO_INSTALL_DIR)"
-	cp $(BLDDIR)/$(TARGET) $(TODO_INSTALL_DIR)
+
+$(DIR_BLD) $(DIR_OBJ): ; mkdir -p $@
+
+
+.PHONY: dev
+dev : CFLAGS += -g -fsanitize=address,leak,undefined
+dev : clean $(DIR_BLD)/$(TARGET)
+
+
+.PHONY: tags
+tags: ; ctags $(SRC)
+
 
 .PHONY: clean
-clean:
-	rm -r $(BLDDIR)
-
+clean: ; rm -rf $(DIR_BLD)
