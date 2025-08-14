@@ -47,7 +47,8 @@
 #define FLAG_NEW_SHORT      "-m"
 #define FLAG_NEW_LONG       "--message"
 
-enum TODO_ACTION {
+enum TODO_ACTION
+{
     ACTION_NONE,
     ACTION_HELP,
     ACTION_EDIT,
@@ -468,12 +469,8 @@ int main(int argc, char *argv[])
             case ACTION_MARK:
             case ACTION_UNMARK:
                 curr_num = input_numeric_parse(
-                    (strlen(curr_option) > 1)
-                        ? curr_option + 2
-                        : NULL,
-                    ((i+1)<argc)
-                        ? argv[i+1]
-                        : NULL,
+                    (strlen(curr_option) > 1) ? curr_option + 2 : NULL,
+                    ((i+1)<argc) ? argv[i+1] : NULL,
                     &i
                 );
 
