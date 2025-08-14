@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define TODO_VERSION "1.6"
+#define TODO_VERSION "1.7"
 #define TODO_MAX_ITEMLINES 64
 #define TODO_DEFAULT_PRINT_NUM 10
 
@@ -96,8 +96,7 @@ void print_help()
 
     printf("Directories are searched upwards for a \'.todo\' file\n");
     printf("Input after -- read from stdin, ignoring blank lines\n");
-    printf("If no arguments supplied, default is todo -t%d\n",
-            TODO_DEFAULT_PRINT_NUM);
+    printf("If no arguments supplied, default is todo -t%d\n", TODO_DEFAULT_PRINT_NUM);
 }
 
 
@@ -269,7 +268,7 @@ void edit_todo_file()
 }
 
 
-void mark_line(enum TODO_ACTION action, int target_line_num)
+void line_edit(enum TODO_ACTION action, int target_line_num)
 {
     bool (*line_test)(char *line) = NULL;
     int curr_line_num = 0,
@@ -345,7 +344,7 @@ void mark_line(enum TODO_ACTION action, int target_line_num)
 
 
 // append an appropriately formatted todo item
-void add_line(char *line)
+void line_add(char *line)
 {
     FILE *fptr = todo_file("a");
     if (!fptr) {
@@ -365,7 +364,7 @@ void add_line(char *line)
  */
 
 
-enum TODO_ACTION input_option_parse(char *option)
+enum TODO_ACTION input_parse_option(char *option)
 {
     if        ( (strncmp(option, FLAG_HELP_SHORT, 2) == 0) ||
                 (strcmp( option, FLAG_HELP_LONG    ) == 0)) {
@@ -402,7 +401,7 @@ enum TODO_ACTION input_option_parse(char *option)
 }
 
 
-int input_numeric_parse(char *primary, char *fallback, int *fallback_ticker)
+int input_parse_numeric(char *primary, char *fallback, int *fallback_ticker)
 {
     int n = 0;
 
@@ -431,7 +430,7 @@ void input_stdin()
             line[len-1] = '\0';
         }
         if (strlen(line) > 0) {
-            add_line(line);
+            line_add(line);
         }
     }
     return;
@@ -447,7 +446,7 @@ int main(int argc, char *argv[])
 
     for (int i=1; i < argc; i++) {
         char *curr_option = argv[i];
-        enum TODO_ACTION curr_action = input_option_parse(curr_option);
+        enum TODO_ACTION curr_action = input_parse_option(curr_option);
         unsigned int curr_num = 0;
 
         switch (curr_action) {
@@ -468,7 +467,7 @@ int main(int argc, char *argv[])
             case ACTION_DONE:
             case ACTION_MARK:
             case ACTION_UNMARK:
-                curr_num = input_numeric_parse(
+                curr_num = input_parse_numeric(
                     (strlen(curr_option) > 1) ? curr_option + 2 : NULL,
                     ((i+1)<argc) ? argv[i+1] : NULL,
                     &i
@@ -480,7 +479,7 @@ int main(int argc, char *argv[])
                 }
 
                 if ((curr_action == ACTION_MARK) || (curr_action == ACTION_UNMARK)) {
-                    mark_line(curr_action, curr_num);
+                    line_edit(curr_action, curr_num);
                 } else {
                     print_lines(curr_action, curr_num);
                 }
@@ -501,7 +500,7 @@ int main(int argc, char *argv[])
                     print_error("%s needs a string argument", argv[i]);
                     return EXIT_FAILURE;
                 }
-                add_line(argv[i+1]);
+                line_add(argv[i+1]);
                 return EXIT_SUCCESS;
 
             /* fail state */
