@@ -23,32 +23,32 @@
 !_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
 !_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
 !_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
-!_TAG_OUTPUT_VERSION	0.0	/current.age/
+!_TAG_OUTPUT_VERSION	1.1	/current.age/
 !_TAG_PARSER_VERSION!C	1.1	/current.age/
 !_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
-!_TAG_PROC_CWD	/home/mcc/programming/todo/	//
+!_TAG_PROC_CWD	/home/mcc/code/todo/	//
 !_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
 !_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
-!_TAG_PROGRAM_VERSION	6.1.0	/v6.1.0/
+!_TAG_PROGRAM_VERSION	6.2.0	/v6.2.0/
 !_TAG_ROLE_DESCRIPTION!C!function	foreigndecl	/declared in foreign languages/
 !_TAG_ROLE_DESCRIPTION!C!header	local	/local header/
 !_TAG_ROLE_DESCRIPTION!C!header	system	/system header/
 !_TAG_ROLE_DESCRIPTION!C!macro	undef	/undefined/
 !_TAG_ROLE_DESCRIPTION!C!struct	foreigndecl	/declared in foreign languages/
 ACTION_ALL	src/todo.c	/^    ACTION_ALL,$/;"	e	enum:TODO_ACTION	file:
-ACTION_CAPTURE	src/todo.c	/^    ACTION_CAPTURE$/;"	e	enum:TODO_ACTION	file:
 ACTION_DONE	src/todo.c	/^    ACTION_DONE,$/;"	e	enum:TODO_ACTION	file:
 ACTION_EDIT	src/todo.c	/^    ACTION_EDIT,$/;"	e	enum:TODO_ACTION	file:
 ACTION_HELP	src/todo.c	/^    ACTION_HELP,$/;"	e	enum:TODO_ACTION	file:
 ACTION_MARK	src/todo.c	/^    ACTION_MARK,$/;"	e	enum:TODO_ACTION	file:
+ACTION_NEW	src/todo.c	/^    ACTION_NEW$/;"	e	enum:TODO_ACTION	file:
 ACTION_NONE	src/todo.c	/^    ACTION_NONE,$/;"	e	enum:TODO_ACTION	file:
+ACTION_STDIN	src/todo.c	/^    ACTION_STDIN,$/;"	e	enum:TODO_ACTION	file:
 ACTION_TODO	src/todo.c	/^    ACTION_TODO,$/;"	e	enum:TODO_ACTION	file:
 ACTION_UNMARK	src/todo.c	/^    ACTION_UNMARK,$/;"	e	enum:TODO_ACTION	file:
 ACTION_VERSION	src/todo.c	/^    ACTION_VERSION,$/;"	e	enum:TODO_ACTION	file:
 FLAG_ALL_LONG	src/todo.c	/^#define FLAG_ALL_LONG /;"	d	file:
 FLAG_ALL_SHORT	src/todo.c	/^#define FLAG_ALL_SHORT /;"	d	file:
-FLAG_CAPTURE	src/todo.c	/^#define FLAG_CAPTURE /;"	d	file:
 FLAG_DONE_LONG	src/todo.c	/^#define FLAG_DONE_LONG /;"	d	file:
 FLAG_DONE_SHORT	src/todo.c	/^#define FLAG_DONE_SHORT /;"	d	file:
 FLAG_EDIT_LONG	src/todo.c	/^#define FLAG_EDIT_LONG /;"	d	file:
@@ -57,35 +57,36 @@ FLAG_HELP_LONG	src/todo.c	/^#define FLAG_HELP_LONG /;"	d	file:
 FLAG_HELP_SHORT	src/todo.c	/^#define FLAG_HELP_SHORT /;"	d	file:
 FLAG_MARK_LONG	src/todo.c	/^#define FLAG_MARK_LONG /;"	d	file:
 FLAG_MARK_SHORT	src/todo.c	/^#define FLAG_MARK_SHORT /;"	d	file:
+FLAG_NEW_LONG	src/todo.c	/^#define FLAG_NEW_LONG /;"	d	file:
+FLAG_NEW_SHORT	src/todo.c	/^#define FLAG_NEW_SHORT /;"	d	file:
+FLAG_STDIN	src/todo.c	/^#define FLAG_STDIN /;"	d	file:
 FLAG_TODO_LONG	src/todo.c	/^#define FLAG_TODO_LONG /;"	d	file:
 FLAG_TODO_SHORT	src/todo.c	/^#define FLAG_TODO_SHORT /;"	d	file:
 FLAG_UNMARK_LONG	src/todo.c	/^#define FLAG_UNMARK_LONG /;"	d	file:
 FLAG_UNMARK_SHORT	src/todo.c	/^#define FLAG_UNMARK_SHORT /;"	d	file:
 FLAG_VERSION_LONG	src/todo.c	/^#define FLAG_VERSION_LONG /;"	d	file:
 FLAG_VERSION_SHORT	src/todo.c	/^#define FLAG_VERSION_SHORT /;"	d	file:
-TODO_ACTION	src/todo.c	/^enum TODO_ACTION {$/;"	g	file:
+TODO_ACTION	src/todo.c	/^enum TODO_ACTION$/;"	g	file:
+TODO_CHAR_MARK_DONE	src/todo.c	/^#define TODO_CHAR_MARK_DONE /;"	d	file:
+TODO_CHAR_MARK_TODO	src/todo.c	/^#define TODO_CHAR_MARK_TODO /;"	d	file:
 TODO_DEFAULT_PRINT_NUM	src/todo.c	/^#define TODO_DEFAULT_PRINT_NUM /;"	d	file:
 TODO_MAX_ITEMLINES	src/todo.c	/^#define TODO_MAX_ITEMLINES /;"	d	file:
 TODO_VERSION	src/todo.c	/^#define TODO_VERSION /;"	d	file:
-add_item	src/todo.c	/^void add_item(char *item)$/;"	f	typeref:typename:void
-atoi_pedantic	src/todo.c	/^int atoi_pedantic(char *str)$/;"	f	typeref:typename:int
-concat_args	src/todo.c	/^char *concat_args(int nstr, char *strs[])$/;"	f	typeref:typename:char *
+add_line	src/todo.c	/^void add_line(char *line)$/;"	f	typeref:typename:void
+atoi_pedantic	src/todo.c	/^unsigned int atoi_pedantic(char *str)$/;"	f	typeref:typename:unsigned int
 edit_todo_file	src/todo.c	/^void edit_todo_file()$/;"	f	typeref:typename:void
 file_exists	src/todo.c	/^bool file_exists(char *file_path)$/;"	f	typeref:typename:bool
+input_numeric_parse	src/todo.c	/^int input_numeric_parse(char *primary, char *fallback, int *fallback_ticker)$/;"	f	typeref:typename:int
+input_option_parse	src/todo.c	/^enum TODO_ACTION input_option_parse(char *option)$/;"	f	typeref:enum:TODO_ACTION
+input_stdin	src/todo.c	/^void input_stdin()$/;"	f	typeref:typename:void
 line_is_done	src/todo.c	/^bool line_is_done(char *line)$/;"	f	typeref:typename:bool
 line_is_todo	src/todo.c	/^bool line_is_todo(char *line)$/;"	f	typeref:typename:bool
 main	src/todo.c	/^int main(int argc, char *argv[])$/;"	f	typeref:typename:int
-mark_done	src/todo.c	/^void mark_done(int item_num)$/;"	f	typeref:typename:void
-mark_todo	src/todo.c	/^void mark_todo(int item_num)$/;"	f	typeref:typename:void
-numeric_parse	src/todo.c	/^int numeric_parse(char *primary, char *fallback)$/;"	f	typeref:typename:int
-option_parse	src/todo.c	/^enum TODO_ACTION option_parse(char *option)$/;"	f	typeref:enum:TODO_ACTION
-print_all	src/todo.c	/^void print_all(int max_lines)$/;"	f	typeref:typename:void
-print_done	src/todo.c	/^void print_done(int max_lines)$/;"	f	typeref:typename:void
+mark_line	src/todo.c	/^void mark_line(enum TODO_ACTION action, int target_line_num)$/;"	f	typeref:typename:void
 print_error	src/todo.c	/^void print_error(const char *message, ...)$/;"	f	typeref:typename:void
 print_help	src/todo.c	/^void print_help()$/;"	f	typeref:typename:void
-print_todo	src/todo.c	/^void print_todo(int max_lines)$/;"	f	typeref:typename:void
+print_lines	src/todo.c	/^void print_lines(enum TODO_ACTION action, int max_lines)$/;"	f	typeref:typename:void
 print_version	src/todo.c	/^void print_version()$/;"	f	typeref:typename:void
 print_with_filter	src/todo.c	/^void print_with_filter(bool (*line_test)(char *line), int max_lines)$/;"	f	typeref:typename:void
 todo_file	src/todo.c	/^FILE *todo_file(char *mode)$/;"	f	typeref:typename:FILE *
-todo_home_path	src/todo.c	/^char *todo_home_path()$/;"	f	typeref:typename:char *
 todo_path	src/todo.c	/^char *todo_path()$/;"	f	typeref:typename:char *
