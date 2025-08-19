@@ -151,25 +151,28 @@ bool file_exists(char *file_path)
 // dynamically source the right .todo file recursively in tree
 char *todo_path()
 {
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    char *path = malloc(PATH_MAX);
+    char *basename = NULL;
+    bool do_search = true;
+
+    if (getcwd(path, PATH_MAX) == NULL) {
         print_error("cannot open working directory: %s", strerror(errno));
-        return NULL;
+        do_search = false;
     }
 
-    char *path = malloc(strlen(cwd) + 7);
-    while (1) {
-        sprintf(path, "%s/.todo", cwd);
-        if (file_exists(path)) {
-            return path;
-        }
+    while (do_search) {
+        strcat(path, "/.todo");
+        if (file_exists(path)) return path;
 
-        char *parent_dir = strrchr(cwd, '/');
-        if (parent_dir == NULL) { break; }
-        *parent_dir = '\0';
-        if (strlen(cwd) == 0) { break; }
+        basename = strrchr(path, '/');
+        *basename = '\0';
+        basename = strrchr(path, '/');
+        if (NULL == basename) break;
+        *basename = '\0';
+        if (0 == strlen(path)) break;
     }
 
+    free(path);
     return NULL;
 }
 
@@ -182,10 +185,7 @@ FILE *todo_file(char *mode)
         return NULL;
     }
     FILE *fptr = fopen(fpath, mode);
-    if (fptr == NULL) {
-        print_error("cannot open %s: %s", fpath, strerror(errno));
-        return NULL;
-    }
+    if (NULL == fptr) print_error("cannot open %s: %s", fpath, strerror(errno));
     free(fpath);
     return fptr;
 }
